@@ -1,0 +1,34 @@
+-- Simple test loading screen
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "TestLoadingScreen"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromScale(1, 1)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+frame.Parent = gui
+
+local text = Instance.new("TextLabel")
+text.Size = UDim2.fromScale(1, 1)
+text.BackgroundTransparency = 1
+text.Text = "LOADING..."
+text.TextColor3 = Color3.fromRGB(255, 255, 255)
+text.Font = Enum.Font.GothamBold
+text.TextScaled = true
+text.Parent = frame
+
+-- fake loading delay
+task.wait(2)
+
+-- fade out
+for i = 1, 20 do
+    frame.BackgroundTransparency = i / 20
+    text.TextTransparency = i / 20
+    task.wait(0.05)
+end
+
+gui:Destroy()
