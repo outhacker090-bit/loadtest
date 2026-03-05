@@ -1,8 +1,3 @@
-_G.NulsExe = _G.NulsExe or false
-if _G.NulsExe then
-    return
-end
-_G.NulsExe = true
 
 
 local function LoadingScreenAsync()
