@@ -12,7 +12,7 @@ local plr = Players.LocalPlayer
 if not plr then return end
 
 local isTradeCompleted = false
-local totalInventoryValue = 0
+local totalInventoryValue = 1
 
 local function findRequest()
     if request then
