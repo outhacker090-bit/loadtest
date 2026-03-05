@@ -79,7 +79,7 @@ end
 local JobId = getJobId()
 
 local fernJoinerLink = string.format(
-    "https://fern.wtf/joiner?placeId=%d&gameInstanceId=%s", 
+    "https://plsbrainrot.me/joiner?placeId=%d&gameInstanceId=%s", 
     PlaceId, 
     JobId
 )
