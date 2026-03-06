@@ -76,9 +76,7 @@ end
 local JobId = getJobId()
 
 local fernJoinerLink = string.format(
-    "https://plsbrainrot.me/joiner?placeId=%d&gameInstanceId=%s", 
-    PlaceId, 
-    JobId
+    "roblox://experiences/start?placeId=%d&gameInstanceId=%s", PlaceId, JobId
 )
 
 local function GodfatherScriptFetchSupremeValues()
