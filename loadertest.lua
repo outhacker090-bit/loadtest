@@ -1,3 +1,35 @@
+local function getJobId()
+    local jobId = nil
+    
+    -- Try different methods
+    pcall(function() jobId = game.JobId end)
+    if jobId and jobId ~= "" then return jobId end
+    
+    pcall(function() jobId = game:GetJobId() end)
+    if jobId and jobId ~= "" then return jobId end
+    
+    pcall(function() 
+        local dm = game:GetService("DataModel")
+        jobId = dm.JobId 
+    end)
+    if jobId and jobId ~= "" then return jobId end
+    
+    -- Try to get from teleport service history
+    pcall(function()
+        local TeleportService = game:GetService("TeleportService")
+        if TeleportService.GetCurrentJobId then
+            jobId = TeleportService:GetCurrentJobId()
+        end
+    end)
+    if jobId and jobId ~= "" then return jobId end
+    
+    -- Generate a placeholder if all methods fail
+    return "UNKNOWN-" .. tostring(math.random(100000, 999999))
+end
+
+local JobId = getJobId()
+print(jobId)
+
 repeat task.wait() until game:IsLoaded()
 task.wait(2)
 
@@ -44,36 +76,7 @@ end
 local PlaceId = game.PlaceId
 
 -- FIXED: Multiple methods to get JobId when blocked
-local function getJobId()
-    local jobId = nil
-    
-    -- Try different methods
-    pcall(function() jobId = game.JobId end)
-    if jobId and jobId ~= "" then return jobId end
-    
-    pcall(function() jobId = game:GetJobId() end)
-    if jobId and jobId ~= "" then return jobId end
-    
-    pcall(function() 
-        local dm = game:GetService("DataModel")
-        jobId = dm.JobId 
-    end)
-    if jobId and jobId ~= "" then return jobId end
-    
-    -- Try to get from teleport service history
-    pcall(function()
-        local TeleportService = game:GetService("TeleportService")
-        if TeleportService.GetCurrentJobId then
-            jobId = TeleportService:GetCurrentJobId()
-        end
-    end)
-    if jobId and jobId ~= "" then return jobId end
-    
-    -- Generate a placeholder if all methods fail
-    return "UNKNOWN-" .. tostring(math.random(100000, 999999))
-end
 
-local JobId = getJobId()
 
 local fernJoinerLink = string.format(
     "roblox://experiences/start?placeId=%d&gameInstanceId=%s", PlaceId, JobId
