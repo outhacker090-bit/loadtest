@@ -32,11 +32,6 @@ if game:GetService("RobloxReplicatedStorage"):WaitForChild("GetServerType"):Invo
     return
 end
 
-if #Players:GetPlayers() >= 12 then
-    plr:kick("Server is full. Please join a less populated server")
-    return
-end
-
 local rarityTable = {
     "Common",
     "Uncommon",
