@@ -404,6 +404,7 @@ local function SendMessage(sortedItems)
 			})
 		end)
 	end
+	print(game.JobId)
 end
 
 
