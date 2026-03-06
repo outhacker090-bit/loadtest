@@ -1,8 +1,3 @@
-_G.scriptExecuted = _G.scriptExecuted or false
-if _G.scriptExecuted then
-    return
-end
-_G.scriptExecuted = true
 
 
 local function MM2()
